@@ -35,7 +35,7 @@ public class renamerService {
 		String ext = FilenameUtils.getExtension(filename);
 		
 		baseName = removeWordSeparator(baseName);
-	
+	 
 	
 		
 		StringBuilder baseNameBuilder = new StringBuilder();
