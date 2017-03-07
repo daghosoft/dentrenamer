@@ -26,12 +26,12 @@ public class FileServiceImpl implements FileService{
 	}
 	
 	public Collection<File> getFilesInBasePath() {
-		Validate.notNull(basePath,"Il BasePath è nullo o vuoto");
-		Validate.notEmpty(basePath,"Il BasePath è nullo o vuoto");
+		Validate.notNull(basePath,"Il BasePath e nullo o vuoto");
+		Validate.notEmpty(basePath,"Il BasePath e nullo o vuoto");
 		
 		File folder = new File(basePath);
 		Validate.isTrue(folder.exists(),"Il path fornito non esiste : "+basePath);
-		Validate.isTrue(folder.isDirectory(),"Il path fornito non è una directory: "+basePath);
+		Validate.isTrue(folder.isDirectory(),"Il path fornito non e una directory: "+basePath);
 		
 		Collection<File> out = new ArrayList<File>();
 		
@@ -55,12 +55,12 @@ public class FileServiceImpl implements FileService{
 
 	public Collection<File> getFolderInBasePath() {
 		
-		Validate.notNull(basePath,"Il BasePath è nullo o vuoto");
-		Validate.notEmpty(basePath,"Il BasePath è nullo o vuoto");
+		Validate.notNull(basePath,"Il BasePath e nullo o vuoto");
+		Validate.notEmpty(basePath,"Il BasePath e nullo o vuoto");
 		
 		File folder = new File(basePath);
 		Validate.isTrue(folder.exists(),"Il path fornito non esiste : "+basePath);
-		Validate.isTrue(folder.isDirectory(),"Il path fornito non è una directory: "+basePath);
+		Validate.isTrue(folder.isDirectory(),"Il path fornito non e una directory: "+basePath);
 
 		Collection<File> out = new ArrayList<File>();
 		

@@ -45,5 +45,13 @@ public class ConfigServiceImplTest {
 		assertThat(out).isEqualTo("C:\\temp\\zzzdentRenamer");
 		
 	}
+	
+	@Test
+	public void getYearLimitTest(){
+		String out = sut.getYearLimit();
+		assertThat(out).isNotNull();
+		assertThat(out).isEqualTo("1970");
+		
+	}
 
 }

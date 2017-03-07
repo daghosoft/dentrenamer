@@ -11,5 +11,7 @@ public interface ConfigService {
 	String getWordSeparator();
 	
 	String getBasePath();
-
+	
+	String getYearLimit();
+	
 }

@@ -7,13 +7,16 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 public class ConfigServiceImpl implements ConfigService {
 	
 	private static final String WORDSEPARATOR = "word.separator";
 	private static final String BLACKLIST = "word.blacklist";
+	private static final String YEARLIMIT = "word.year.limit";
 	private static final String BASEPATH = "file.basePath";
+	
 	
 	private Properties properties;
 	
@@ -52,4 +55,16 @@ public class ConfigServiceImpl implements ConfigService {
 		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
 		return ((String) properties.get(BASEPATH)).trim();
 	}
+	
+	public String getYearLimit() {
+		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
+		
+		if(properties.containsKey(YEARLIMIT)){
+			return ((String) properties.get(YEARLIMIT)).trim();
+		}
+		
+		return StringUtils.EMPTY;
+	}
+	
+	
 }
