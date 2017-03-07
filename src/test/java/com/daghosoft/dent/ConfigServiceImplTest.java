@@ -15,6 +15,34 @@ public class ConfigServiceImplTest {
 		Properties out = sut.getPropertySet();
 		assertThat(out).isNotNull();
 		assertThat(out.get("test")).isEqualTo("fakeString");
+		assertThat(out.get("fake")).isNull();
+		
+	}
+	
+	@Test
+	public void getWordSeparatorTest(){
+		
+		String out = sut.getWordSeparator();
+		assertThat(out).isNotNull();
+		assertThat(out).isEqualTo("-;+;_;.;[;]");
+		
+	}
+	
+	@Test
+	public void getBlackListTest(){
+		
+		String out = sut.getBlackList();
+		assertThat(out).isNotNull();
+		assertThat(out).isEqualTo("iTALiAN;BDRip;XviD;TRL;MT;dvdRip;sub;ita;SNAPSHOT;executable");
+		
+	}
+	
+	@Test
+	public void getBasePathTest(){
+		
+		String out = sut.getBasePath();
+		assertThat(out).isNotNull();
+		assertThat(out).isEqualTo("C:\\temp\\zzzdentRenamer");
 		
 	}
 

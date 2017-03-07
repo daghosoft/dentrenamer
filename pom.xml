@@ -5,6 +5,11 @@
 	<artifactId>dentRenamer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
+	<properties>
+		<project.encoding>UTF-8</project.encoding>
+		<java-version>1.7</java-version>
+	</properties>
+
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
@@ -12,12 +17,18 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.5</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
 			<version>2.6</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.7.24</version>
 		</dependency>
 
 
@@ -33,6 +44,89 @@
 			<version>1.7.1</version>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/lib</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+
+							<target name="create_run_jar">
+
+								<!-- Retrieve file dependecy list -->
+								<path id="build.path">
+									<fileset dir="${project.build.directory}/lib" />
+								</path>
+
+								<!-- Format path -->
+								<pathconvert pathsep=" " property="echo.file.list"
+									refid="build.path">
+									<map from="${basedir}/target/lib/" to="" />
+								</pathconvert>
+								<echo>${echo.file.list}</echo>
+								<!--End Retrieve file dependecy list -->
+
+								<jar
+									destfile="${project.build.directory}/executable/${project.artifactId}-${project.version}-executable.jar">
+									<manifest>
+										<attribute name="Main-Class"
+											value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
+										<attribute name="Rsrc-Main-Class" value="com.daghosoft.dent.Main" />
+										<attribute name="Class-Path" value="." />
+										<attribute name="Rsrc-Class-Path" value="./ ${echo.file.list}" />
+									</manifest>
+									<zipfileset src="./jar-in-jar-loader.zip" />
+									<fileset dir="${project.build.directory}/classes" />
+									<zipfileset dir="${project.build.directory}/lib" includes="*.jar" />
+								</jar>
+							</target>
+
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptor>src/assembly/dist.xml</descriptor>
+					<finalName>${project.artifactId}-${project.version}</finalName>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+		</plugins>
+	</build>
+	
 </project>

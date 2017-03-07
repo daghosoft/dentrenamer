@@ -10,21 +10,32 @@ import org.apache.commons.lang.WordUtils;
 
 public class RenamerServiceImpl implements RenamerService {
 
-	//private static final String BLACKLISTPARAM="iTALiAN;BDRip;XviD;TRL;MT;dvdRip;sub;ita";
-	//private static final String WORDSEPARATORPARAM = "-;+;_;.;[;]";
 	
-	private static List<String> BLACKLIST= new ArrayList<String>();
-	private static List<String> WORDSEPARATORLIST= new ArrayList<String>();
+	private static List<String> blackList= new ArrayList<String>();
+	private static List<String> wordSeparatorlist= new ArrayList<String>();
 	
-	public RenamerServiceImpl(String blackList,String wordSeparators) {
-		String [] arr = blackList.toLowerCase().split(";");
-		BLACKLIST = Arrays.asList(arr);
+	//Costruttore di test
+	protected RenamerServiceImpl(String pBlackList,String pWordSeparator) {
+		String [] arr = pBlackList.toLowerCase().split(";");
+		blackList = Arrays.asList(arr);
 		
-		String [] ws = wordSeparators.split(";");
-		WORDSEPARATORLIST = Arrays.asList(ws);
+		String [] ws = pWordSeparator.split(";");
+		wordSeparatorlist = Arrays.asList(ws);
 	}
 	
-	public String rename(final String fileName) {
+	public RenamerServiceImpl(ConfigService configService) {
+		
+		String pBlackList = configService.getBlackList();
+		String pWordSeparator =  configService.getWordSeparator();
+		
+		String [] arr = pBlackList.toLowerCase().split(";");
+		blackList = Arrays.asList(arr);
+		
+		String [] ws = pWordSeparator.split(";");
+		wordSeparatorlist = Arrays.asList(ws);
+	}
+	
+	public String renameFile(final String fileName) {
 		
 		String baseName = FilenameUtils.getBaseName(fileName).toLowerCase();
 		String ext = FilenameUtils.getExtension(fileName);
@@ -43,8 +54,32 @@ public class RenamerServiceImpl implements RenamerService {
 			baseNameBuilder.append(tmp).append(" ");
 		}
 		
-		String out = baseNameBuilder.toString().trim()+"."+ext;
+		String out = baseNameBuilder.toString().trim()+"."+ext.toLowerCase();
 		out = WordUtils.capitalizeFully(out);
+		out = StringUtils.normalizeSpace(out);
+		return out;
+	}
+	
+	public String renameFolder(String folderName) {
+		String baseName = folderName.toLowerCase();
+		
+		baseName = removeWordSeparator(baseName);
+		
+		StringBuilder baseNameBuilder = new StringBuilder();
+		String[] fileNameArr = baseName.split(" ");
+		
+		for(int x=0;x<fileNameArr.length;x++){
+			String tmp = fileNameArr[x];
+			
+			tmp = blackListFilter(tmp);
+			tmp = yearBuilder(tmp);
+			
+			baseNameBuilder.append(tmp).append(" ");
+		}
+		
+		String out = baseNameBuilder.toString().trim();
+		out = WordUtils.capitalizeFully(out);
+		out = StringUtils.normalizeSpace(out);
 		return out;
 	}
 	
@@ -52,7 +87,7 @@ public class RenamerServiceImpl implements RenamerService {
 	
 	protected String removeWordSeparator(String w){
 		String out = w;
-		for(String s : WORDSEPARATORLIST){
+		for(String s : wordSeparatorlist){
 			out = out.replace(s, " ");
 		}
 		return out;
@@ -74,11 +109,31 @@ public class RenamerServiceImpl implements RenamerService {
 	protected String blackListFilter(String w){
 		String out = w;
 		
-		if(BLACKLIST.contains(w.toLowerCase())){
+		if(blackList.contains(w.toLowerCase())){
 			out=StringUtils.EMPTY;
 		}
 		
 		return out;
 	}
+	
+	public Boolean fileNameNeedRename(String filename){
+		Boolean out = false;
+		
+		for(String blackWord : wordSeparatorlist){
+			if(filename.contains(blackWord)){
+				return true;
+			}
+		}
+		
+		for(String blackWord : blackList){
+			if(filename.contains(blackWord)){
+				return true;
+			}
+		}
+		
+		return out;
+	}
+
+	
 
 }

@@ -7,34 +7,49 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 
+import org.apache.commons.lang.Validate;
+
 public class ConfigServiceImpl implements ConfigService {
 	
-	private Properties pro;
+	private static final String WORDSEPARATOR = "word.separator";
+	private static final String BLACKLIST = "word.blacklist";
+	private static final String BASEPATH = "file.basePath";
+	
+	private Properties properties;
 	
 	public ConfigServiceImpl() {
 		URL config = this.getClass().getResource("/config.properties");
-		if(config!=null){
+		
+		Validate.notNull(config,"Errore recupero file di configurazione config.properties");
+		
 			try {
-				System.out.println(config.getPath());
-				
 				File fconfig = new File(config.getPath());
-				System.out.println(fconfig.getAbsolutePath());
-				
 				FileInputStream fis = new FileInputStream(fconfig);
-				pro = new Properties();
-				pro.load(fis);
+				properties = new Properties();
+				properties.load(fis);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}else{
-			System.out.println("Errore recupero file di configurazione config.properties");
-		}
 	}
 
 	public Properties getPropertySet() {
-		return pro;
+		return properties;
 	}
 
+	public String getBlackList() {
+		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
+		return ((String) properties.get(BLACKLIST)).trim();
+	}
+
+	public String getWordSeparator() {
+		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
+		return ((String) properties.get(WORDSEPARATOR)).trim();
+	}
+
+	public String getBasePath() {
+		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
+		return ((String) properties.get(BASEPATH)).trim();
+	}
 }

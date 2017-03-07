@@ -2,6 +2,10 @@ package com.daghosoft.dent;
 
 public interface RenamerService {
 
-	String rename(String fileName);
+	String renameFile(String fileName);
+	
+	String renameFolder(String folderName);
+	
+	Boolean fileNameNeedRename(String filename);
 
 }
