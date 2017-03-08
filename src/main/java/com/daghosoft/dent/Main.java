@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,7 @@ public class Main {
 
 	private static Logger LOGGER = LoggerFactory.getLogger(FileServiceImpl.class);
 	private static RenamerServiceImpl renamerService;
-	
+	private static final char separator = File.separatorChar;
 	 
 	 public static void main(String[] args) {
 		 LOGGER.info("Start Dent Renamer Execution");
@@ -35,9 +36,7 @@ public class Main {
 		 for(File f : itemList){
 			 String containingPath= FilenameUtils.getFullPath(f.getAbsolutePath());
 			 String name = f.getName();
-			 String targetName = renamerService.renameFile(name);
-			 char separator = File.separatorChar;
-			
+			 String targetName = renamerService.rename(name,true);
 			 try {
 				 File targetFile = new File(containingPath+separator+targetName);
 				 if(!targetFile.exists()){
@@ -47,7 +46,7 @@ public class Main {
 					 }
 				 }
 			} catch (IOException e) {
-				LOGGER.error("",e);
+				LOGGER.error(StringUtils.EMPTY,e);
 			}
 		 }
 	 }
@@ -56,9 +55,7 @@ public class Main {
 		 for(File f : itemList){
 			 String containingPath= FilenameUtils.getFullPath(f.getAbsolutePath());
 			 String name = f.getName();
-			 String targetName = renamerService.renameFolder(name);
-			 char separator = File.separatorChar;
-			
+			 String targetName = renamerService.rename(name,false);
 			 try {
 				 File targetFolder = new File(containingPath+separator+targetName);
 				 if(!targetFolder.exists()){
@@ -68,7 +65,7 @@ public class Main {
 					 }
 				 }
 			} catch (IOException e) {
-				LOGGER.error("",e);
+				LOGGER.error(StringUtils.EMPTY,e);
 			}
 		 }
 	 }

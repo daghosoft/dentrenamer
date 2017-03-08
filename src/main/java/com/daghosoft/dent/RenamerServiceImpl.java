@@ -17,7 +17,6 @@ public class RenamerServiceImpl implements RenamerService {
 	private static List<String> blackList= new ArrayList<String>();
 	private static List<String> wordSeparatorlist= new ArrayList<String>();
 	private int yearLimit = 1900;
-	private boolean yearFound =false;
 	
 	//Costruttore di test
 	protected RenamerServiceImpl(String pBlackList,String pWordSeparator,String pYearLimit) {
@@ -52,55 +51,78 @@ public class RenamerServiceImpl implements RenamerService {
 		
 	}
 	
-	public String renameFile(final String fileName) {
-		yearFound = false;
-		String baseName = FilenameUtils.getBaseName(fileName).toLowerCase();
-		String ext = FilenameUtils.getExtension(fileName);
+	public String rename(final String name,Boolean isFile) {
+		String baseName = name.toLowerCase();
+		String ext=StringUtils.EMPTY;
+		
+		if(isFile){
+			baseName = FilenameUtils.getBaseName(name).toLowerCase();
+			ext = "."+FilenameUtils.getExtension(name).toLowerCase();
+		}
 		
 		baseName = removeWordSeparator(baseName);
 		
 		StringBuilder baseNameBuilder = new StringBuilder();
 		String[] fileNameArr = baseName.split(" ");
+		boolean containYear = containYear(fileNameArr);
+		boolean yearFound = false;
 		
 		for(int x=0;x<fileNameArr.length;x++){
 			String tmp = fileNameArr[x];
 			
 			tmp = yearBuilder(tmp);
-			tmp = blackListFilter(tmp);
+			
+			if(tmp.contains("-")){
+				yearFound=true;
+			}
+			
+			if(containYear && yearFound){
+				tmp = blackListFilter(tmp);
+			}else if(!containYear){
+				tmp = blackListFilter(tmp);
+			}
+			
 			
 			baseNameBuilder.append(tmp).append(" ");
 		}
 		
-		String out = baseNameBuilder.toString().trim()+"."+ext.toLowerCase();
+		String out = baseNameBuilder.toString().trim()+ext;
+		
 		out = WordUtils.capitalizeFully(out);
 		out = StringUtils.normalizeSpace(out);
+		//Nel caso l'anno sia subito prima dell'estenzione cancello il separatore -
+		out = normalizeYearSeparator(out);
 		return out;
 	}
 	
-	public String renameFolder(String folderName) {
-		yearFound = false;
-		String baseName = folderName.toLowerCase();
+	protected String normalizeYearSeparator(String w){
+		String out = w.replace(" -.", ".");
+		if(out.endsWith("-")){
+			out = out.replace("-", StringUtils.EMPTY).trim();
+		}
 		
-		baseName = removeWordSeparator(baseName);
+		return out;
+	}
+	
+	
+	protected Boolean containYear(String[] fileNameArr){
 		
-		StringBuilder baseNameBuilder = new StringBuilder();
-		String[] fileNameArr = baseName.split(" ");
+		if(fileNameArr==null || fileNameArr.length==0 ){
+			return false;
+		}
 		
 		for(int x=0;x<fileNameArr.length;x++){
-			String tmp = fileNameArr[x];
-			
-			tmp = yearBuilder(tmp);
-			tmp = blackListFilter(tmp);
-			
-			baseNameBuilder.append(tmp).append(" ");
+			try {
+				Integer year = Integer.valueOf(fileNameArr[x]);
+				if(year>=yearLimit){
+					return true;
+				}
+				
+			} catch (NumberFormatException e) {
+			}
 		}
-		
-		String out = baseNameBuilder.toString().trim();
-		out = WordUtils.capitalizeFully(out);
-		out = StringUtils.normalizeSpace(out);
-		return out;
+		return false;
 	}
-	
 	
 	
 	protected String removeWordSeparator(String w){
@@ -116,8 +138,7 @@ public class RenamerServiceImpl implements RenamerService {
 		try {
 			int year = Integer.valueOf(w);
 			if(year>=yearLimit){
-				out = "("+w+")";
-				yearFound = true;
+				out = "("+w+") - ";
 			}
 		} catch (NumberFormatException e) {
 		}

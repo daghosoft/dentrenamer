@@ -16,53 +16,92 @@ public class RenamerServiceTest {
 	@Test
 	public void renameFile(){
 		String filename = "Guardiani.Della.Galassia.(2014)..        ...iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.avi";
-		String out = sut.renameFile(filename);
+		String out = sut.rename(filename,true);
 		
 		assertThat(out).isEqualTo("Guardiani Della Galassia (2014).avi");
 	}
 	
 	@Test
 	public void renameYearFileTest(){
-		String filename = "Guardiani.Della.Galassia.2014.        ...iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.avi";
+		String filename = "Guardiani.Della.Galassia.2014.        ...fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.avi";
 		
 		sut = new RenamerServiceImpl(BLACKLISTPARAM,WORDSEPARATORPARAM,"2020");
-		String out = sut.renameFile(filename);
-		assertThat(out).isEqualTo("Guardiani Della Galassia 2014.avi");
+		String out = sut.rename(filename,true);
+		assertThat(out).isEqualTo("Guardiani Della Galassia 2014 Fakenotfilter.avi");
 		
 		sut = new RenamerServiceImpl(BLACKLISTPARAM,WORDSEPARATORPARAM,"1980");
-		out = sut.renameFile(filename);
-		assertThat(out).isEqualTo("Guardiani Della Galassia (2014).avi");
+		out = sut.rename(filename,true);
+		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter.avi");
 		
 		sut = new RenamerServiceImpl(BLACKLISTPARAM,WORDSEPARATORPARAM,"");
-		out = sut.renameFile(filename);
-		assertThat(out).isEqualTo("Guardiani Della Galassia (2014).avi");
+		out = sut.rename(filename,true);
+		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter.avi");
 		
 		sut = new RenamerServiceImpl(BLACKLISTPARAM,WORDSEPARATORPARAM,null);
-		out = sut.renameFile(filename);
-		assertThat(out).isEqualTo("Guardiani Della Galassia (2014).avi");
+		out = sut.rename(filename,true);
+		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter.avi");
 	}
 	
 	@Test
-	@Ignore
 	public void renameYearFileCheckAfetYearTest(){
 		String filename = "The.italian.job.2010.dvdRip-sub-ita.dvx";
 
-		String out = sut.renameFile(filename);
+		String out = sut.rename(filename,true);
 		assertThat(out).isEqualTo("The Italian Job (2010).dvx");
 		
 		filename = "The.italian.job.2010.dvdRip-sub-ita";
-		out = sut.renameFolder(filename);
+		out = sut.rename(filename,false);
 		assertThat(out).isEqualTo("The Italian Job (2010)");
+		
+		filename = "The.italian.job.2010.dvdRip-sub-ita-fakestring";
+		out = sut.rename(filename,false);
+		assertThat(out).isEqualTo("The Italian Job (2010) - Fakestring");
 		
 	}
 	
+	
+	
 	@Test
 	public void renameFolder(){
-		String folderName = "FOlderGenericInvoker-1.0.3-SNAPSHOT-executable - Copy - 2010";
-		String out = sut.renameFolder(folderName);
-		assertThat(out).isEqualTo("Foldergenericinvoker 1 0 3 Snapshot Executable Copy (2010)");
+		String folderName = "FOlderGenericInvoker-1.0.3-SNAPSHOT-executable - Copy - 2010.Fakenotfilter";
+		String out = sut.rename(folderName,false);
+		assertThat(out).isEqualTo("Foldergenericinvoker 1 0 3 Snapshot Executable Copy (2010) - Fakenotfilter");
+		
+		folderName = "FOlderGenericInvoker - Copy - 2010";
+		out = sut.rename(folderName,false);
+		assertThat(out).isEqualTo("Foldergenericinvoker Copy (2010)");
 	}
 	
+	@Test
+	public void containYearTest(){
+		String filename = sut.removeWordSeparator( "The.italian.job.2010.dvdRip-sub-ita.dvx");
+		boolean out = sut.containYear(filename.split(" "));
+		assertThat(out).isTrue();
+		
+		out = sut.containYear("The italian job dvdRip sub ita.dvx".split(" "));
+		assertThat(out).isFalse();
+		
+		out = sut.containYear(null);
+		assertThat(out).isFalse();
+		
+		out = sut.containYear(new String[]{""});
+		assertThat(out).isFalse();
+	}
+	
+	@Test
+	public void normalizeYearSeparatorTest(){
+		String out = sut.normalizeYearSeparator("fake -.dvx");
+		assertThat(out).isEqualTo("fake.dvx");
+		
+		out = sut.normalizeYearSeparator("fake -");
+		assertThat(out).isEqualTo("fake");
+		
+		out = sut.normalizeYearSeparator("fake - fake.dvx");
+		assertThat(out).isEqualTo("fake - fake.dvx");
+		
+		out = sut.normalizeYearSeparator("fake - fake");
+		assertThat(out).isEqualTo("fake - fake");
+	}
 	
 	@Test
 	public void blackListFilterTest(){
@@ -79,7 +118,7 @@ public class RenamerServiceTest {
 		assertThat(out).isEqualTo("batMan");
 		
 		out = sut.yearBuilder("1989");
-		assertThat(out).isEqualTo("(1989)");
+		assertThat(out).isEqualTo("(1989) - ");
 		
 		out = sut.yearBuilder("[2017]");
 		assertThat(out).isEqualTo("[2017]");
