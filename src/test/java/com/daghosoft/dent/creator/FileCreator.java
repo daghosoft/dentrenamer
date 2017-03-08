@@ -28,7 +28,7 @@ public class FileCreator {
 	}
 	
 	@Test
-	//@Ignore
+	@Ignore
 	public void generateFiles() throws IOException{
 		String separator = File.separator;
 		String lines[] = readFileNamePackage().split("\\r?\\n");
