@@ -6,9 +6,10 @@ import org.junit.Test;
 public class MainTest {
 	
 	@Test
-	@Ignore
+	//@Ignore
 	public void mainTest(){
 		Main.main(null);
 	}
+	
 
 }

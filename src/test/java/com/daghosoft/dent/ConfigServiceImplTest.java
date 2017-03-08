@@ -1,8 +1,10 @@
 package com.daghosoft.dent;
 
+import java.io.File;
 import java.util.Properties;
 
 import org.junit.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConfigServiceImplTest {
@@ -52,6 +54,13 @@ public class ConfigServiceImplTest {
 		assertThat(out).isNotNull();
 		assertThat(out).isEqualTo("1970");
 		
+	}
+	
+	@Test
+	public void getReportFileTest(){
+		File f = sut.getReportFile();
+		assertThat(f).isNotNull();
+		assertThat(f.getName()).isEqualTo("dent-renamer-report.log");
 	}
 
 }

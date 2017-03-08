@@ -1,5 +1,6 @@
 package com.daghosoft.dent;
 
+import java.io.File;
 import java.util.Properties;
 
 public interface ConfigService {
@@ -13,5 +14,7 @@ public interface ConfigService {
 	String getBasePath();
 	
 	String getYearLimit();
+	
+	File getReportFile();
 	
 }

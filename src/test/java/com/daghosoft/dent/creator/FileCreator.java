@@ -12,7 +12,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class FileCreator {
-	private static final String BASEPATH = "C:\\temp\\zzzdentRenamer\\FileCreator";
+	private static final String BASEPATH = "//uploads//FileCreator";
 	
 	@Test
 	@Ignore
@@ -29,9 +29,9 @@ public class FileCreator {
 	
 	@Test
 	@Ignore
-	public void generateFiles() throws IOException{
+	public void generatefakeListFiles() throws IOException{
 		String separator = File.separator;
-		String lines[] = readFileNamePackage().split("\\r?\\n");
+		String lines[] = readFileNamePackage("/fakeFileList.txt").split("\\r?\\n");
 		
 		for(int x=0;x<lines.length;x++){
 			if(StringUtils.isNotBlank(lines[x])){
@@ -42,9 +42,24 @@ public class FileCreator {
 		}
 	}
 	
+	@Test
+	@Ignore
+	public void generateMyMovieListFiles() throws IOException{
+		String separator = File.separator;
+		String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");
+		
+		for(int x=0;x<lines.length;x++){
+			if(StringUtils.isNotBlank(lines[x])){
+				String filename = BASEPATH+separator+lines[x];
+				System.out.println("Generating file : "+filename);
+				FileUtils.writeStringToFile(new File(filename), UUID.randomUUID().toString(), "UTF-8");
+			}
+		}
+	}
 	
-	protected String readFileNamePackage() {
-		InputStream stream = this.getClass().getResourceAsStream("/fakeFileList.txt");
+	
+	protected String readFileNamePackage(String fileName) {
+		InputStream stream = this.getClass().getResourceAsStream(fileName);
 		
 		String out = StringUtils.EMPTY;
 		if (stream != null) {

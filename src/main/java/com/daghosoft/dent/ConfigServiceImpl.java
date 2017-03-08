@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
@@ -16,7 +17,7 @@ public class ConfigServiceImpl implements ConfigService {
 	private static final String BLACKLIST = "word.blacklist";
 	private static final String YEARLIMIT = "word.year.limit";
 	private static final String BASEPATH = "file.basePath";
-	
+	private static String execPath;
 	
 	private Properties properties;
 	
@@ -27,6 +28,7 @@ public class ConfigServiceImpl implements ConfigService {
 		
 			try {
 				File fconfig = new File(config.getPath());
+				execPath = FilenameUtils.getFullPathNoEndSeparator(config.getPath());
 				FileInputStream fis = new FileInputStream(fconfig);
 				properties = new Properties();
 				properties.load(fis);
@@ -64,6 +66,11 @@ public class ConfigServiceImpl implements ConfigService {
 		}
 		
 		return StringUtils.EMPTY;
+	}
+
+	public File getReportFile() {
+		Validate.notNull(execPath);
+		return new File(execPath+File.separatorChar+"dent-renamer-report.log");
 	}
 	
 	
