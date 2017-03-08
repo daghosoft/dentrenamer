@@ -24,7 +24,7 @@ public class ConfigServiceImplTest {
 		
 		String out = sut.getWordSeparator();
 		assertThat(out).isNotNull();
-		assertThat(out).isEqualTo("-;+;_;.;[;]");
+		assertThat(out).isEqualTo("-;+;_;.;[;];(;)");
 		
 	}
 	
