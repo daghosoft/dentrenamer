@@ -48,25 +48,30 @@ public class ConfigServiceImpl implements ConfigService {
 			}
 	}
 
+	@Override
 	public Properties getPropertySet() {
 		return properties;
 	}
-
+	
+	@Override
 	public String getBlackList() {
 		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
 		return ((String) properties.get(BLACKLIST)).trim();
 	}
-
+	
+	@Override
 	public String getWordSeparator() {
 		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
 		return ((String) properties.get(WORDSEPARATOR)).trim();
 	}
-
+	
+	@Override
 	public String getBasePath() {
 		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
 		return ((String) properties.get(BASEPATH)).trim();
 	}
 	
+	@Override
 	public String getYearLimit() {
 		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
 		
@@ -76,7 +81,8 @@ public class ConfigServiceImpl implements ConfigService {
 		
 		return StringUtils.EMPTY;
 	}
-
+	
+	@Override
 	public File getReportFile() {
 		Validate.notNull(execPath);
 		return new File(execPath+File.separatorChar+"dent-renamer-report.csv");
