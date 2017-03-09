@@ -12,7 +12,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class FileCreator {
-	private static final String BASEPATH = "//uploads//FileCreator";
+	private static final String BASEPATH = "C:\\temp\\zzzdentRenamer";
+	
+	char separator = File.separatorChar;
 	
 	@Test
 	@Ignore
@@ -30,7 +32,6 @@ public class FileCreator {
 	@Test
 	@Ignore
 	public void generatefakeListFiles() throws IOException{
-		String separator = File.separator;
 		String lines[] = readFileNamePackage("/fakeFileList.txt").split("\\r?\\n");
 		
 		for(int x=0;x<lines.length;x++){
@@ -43,9 +44,9 @@ public class FileCreator {
 	}
 	
 	@Test
-	@Ignore
+	//@Ignore
 	public void generateMyMovieListFiles() throws IOException{
-		String separator = File.separator;
+	
 		String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");
 		
 		for(int x=0;x<lines.length;x++){
