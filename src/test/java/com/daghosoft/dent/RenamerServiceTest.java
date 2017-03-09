@@ -7,7 +7,7 @@ import org.junit.Test;
 
 public class RenamerServiceTest {
 	
-	private static final String BLACKLISTPARAM="iTALiAN;BDRip;XviD;TRL;MT;dvdRip;sub;ita";
+	private static final String BLACKLISTPARAM="iTALiAN;BDRip;XviD;TRL;MT;dvdRip;sub;ita;MIRCrew";
 	private static final String WORDSEPARATORPARAM = "-;+;_;.;[;]";
 	private static final String YEARLIMIT = "1900";
 	
@@ -40,6 +40,7 @@ public class RenamerServiceTest {
 		sut = new RenamerServiceImpl(BLACKLISTPARAM,WORDSEPARATORPARAM,null);
 		out = sut.rename(filename,true);
 		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter.avi");
+	
 	}
 	
 	@Test
@@ -139,6 +140,26 @@ public class RenamerServiceTest {
 		
 		out = sut.fileNameNeedRename("Guardiani  Della Galassia 2014 campione test fine");
 		assertThat(out).isFalse();
+	}
+	
+	@Test
+	public void concatWordsFilterTest(){
+		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
+		String filename = "Guardiani.Della.Galassia.2014.fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.avi";
+		String out = lsut.concatWordsFilter(filename);
+		
+		assertThat(out).isNotEqualTo(filename);
+		assertThat(out).isEqualTo("guardiani.della.galassia.2014.fakenotfilter..avi");
+	}
+	
+	@Test
+	public void renameConcatWordsFilterTest(){
+		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
+		String filename = "Guardiani.Della.Galassia.2014.fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.dvx.blueRay.avi";
+		String out = lsut.rename(filename,true);
+		
+		assertThat(out).isNotEqualTo(filename);
+		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter.avi");
 	}
 	
 	

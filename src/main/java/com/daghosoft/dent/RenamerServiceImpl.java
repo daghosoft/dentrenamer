@@ -2,6 +2,7 @@ package com.daghosoft.dent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -16,6 +17,7 @@ public class RenamerServiceImpl implements RenamerService {
 	
 	private static List<String> blackList= new ArrayList<String>();
 	private static List<String> wordSeparatorlist= new ArrayList<String>();
+	private static List<String> concatWordslist = new ArrayList<String>();
 	private int yearLimit = 1900;
 	
 	//Costruttore di test
@@ -38,11 +40,15 @@ public class RenamerServiceImpl implements RenamerService {
 		String pBlackList = configService.getBlackList();
 		String pWordSeparator =  configService.getWordSeparator();
 		
+		concatWordslist = configService.getConcatWords();
+		
 		String [] arr = pBlackList.toLowerCase().split(";");
 		blackList = Arrays.asList(arr);
 		
 		String [] ws = pWordSeparator.split(";");
 		wordSeparatorlist = Arrays.asList(ws);
+		
+		
 		
 		try {
 			yearLimit = Integer.valueOf(configService.getYearLimit());
@@ -60,6 +66,7 @@ public class RenamerServiceImpl implements RenamerService {
 			ext = "."+FilenameUtils.getExtension(name).toLowerCase();
 		}
 		
+		baseName = concatWordsFilter(baseName);
 		baseName = removeWordSeparator(baseName);
 		
 		StringBuilder baseNameBuilder = new StringBuilder();
@@ -146,6 +153,18 @@ public class RenamerServiceImpl implements RenamerService {
 		return out;
 	}
 	
+	protected String concatWordsFilter(String fileName){
+		String out = fileName.toLowerCase();
+		for(String s : concatWordslist){
+			if(out.contains(s.toLowerCase())){
+				out = out.replace(s.toLowerCase(), "");	
+				LOGGER.debug("###### String found : {}",s);
+			}
+		}
+		
+		return out;
+	}
+	
 	protected String blackListFilter(String w){
 		String out = w;
 		
@@ -173,7 +192,6 @@ public class RenamerServiceImpl implements RenamerService {
 		
 		return out;
 	}
-
 	
 
 }

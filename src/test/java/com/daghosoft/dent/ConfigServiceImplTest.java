@@ -1,6 +1,8 @@
 package com.daghosoft.dent;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -18,7 +20,6 @@ public class ConfigServiceImplTest {
 		assertThat(out).isNotNull();
 		assertThat(out.get("test")).isEqualTo("fakeString");
 		assertThat(out.get("fake")).isNull();
-		
 	}
 	
 	@Test
@@ -35,7 +36,7 @@ public class ConfigServiceImplTest {
 		
 		String out = sut.getBlackList();
 		assertThat(out).isNotNull();
-		assertThat(out).isEqualTo("iTALiAN;BDRip;XviD;TRL;MT;dvdRip;sub;ita;SNAPSHOT;executable");
+		assertThat(out).isEqualTo("BDRip;XviD;TRL;MT;sub;dvx;blueRay;");
 		
 	}
 	
@@ -60,7 +61,14 @@ public class ConfigServiceImplTest {
 	public void getReportFileTest(){
 		File f = sut.getReportFile();
 		assertThat(f).isNotNull();
-		assertThat(f.getName()).isEqualTo("dent-renamer-report.log");
+		assertThat(f.getName()).isEqualTo("dent-renamer-report.csv");
+	}
+	
+	@Test
+	public void getConcatWordsTest(){
+		List<String> out = sut.getConcatWords();
+		assertThat(out).isNotNull();
+		assertThat(out.size()>1).isTrue();
 	}
 
 }

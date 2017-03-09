@@ -3,6 +3,8 @@ package com.daghosoft.dent.creator;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -16,7 +18,7 @@ public class FileCreator {
 	
 	char separator = File.separatorChar;
 	
-	@Test
+	@Test 
 	@Ignore
 	public void BasePathCreator() throws IOException{
 		File basePath = new File(BASEPATH);
@@ -44,7 +46,7 @@ public class FileCreator {
 	}
 	
 	@Test
-	//@Ignore
+	@Ignore
 	public void generateMyMovieListFiles() throws IOException{
 	
 		String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");
@@ -53,7 +55,36 @@ public class FileCreator {
 			if(StringUtils.isNotBlank(lines[x])){
 				String filename = BASEPATH+separator+lines[x];
 				System.out.println("Generating file : "+filename);
-				FileUtils.writeStringToFile(new File(filename), UUID.randomUUID().toString(), "UTF-8");
+				
+				Collection<String> ext = new ArrayList<String>();
+				ext.add(".dvx");
+				ext.add(".mp4");
+				ext.add(".sub");
+				ext.add(".avi");
+				ext.add(".srt");
+				ext.add(".mkv");
+				ext.add(".txt");
+				ext.add(".idx");
+				ext.add(".rar");
+				ext.add(".jpg");
+				ext.add(".jpeg");
+				ext.add(".png");
+				ext.add(".m4v ");
+				
+				
+				boolean isFile = false;
+				for(String s : ext){
+					if(filename.toLowerCase().contains(s)){
+						isFile=true;
+					}
+				}
+				
+				if(isFile){
+					FileUtils.writeStringToFile(new File(filename), UUID.randomUUID().toString(), "UTF-8");
+				}else{
+					FileUtils.forceMkdir(new File(filename));
+				}
+				
 			}
 		}
 	}

@@ -98,7 +98,7 @@ public class Main {
 			 report.delete();
 		 }
 		 try {
-			StringBuilder headerBuilder = new StringBuilder("Dent renamer eseguito in modalit√† report @ ")
+			StringBuilder headerBuilder = new StringBuilder("Dent renamer eseguito in modalita† report @ ")
 			 									.append(new Date().toString())
 			 									.append(" - Per eseguire il rename dei file utilizzare parametro [exec]")
 			 									.append("\n");
@@ -111,7 +111,7 @@ public class Main {
 	 
 	 private static void writeLineInReport(String fileName,String targetName){
 		 try {
-			FileUtils.write(report, fileName + " ####### "+targetName+"\n", "UTF-8", true);
+			FileUtils.write(report, fileName + " ; "+targetName+"\n", "UTF-8", true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

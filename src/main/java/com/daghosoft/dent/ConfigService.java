@@ -1,6 +1,7 @@
 package com.daghosoft.dent;
 
 import java.io.File;
+import java.util.List;
 import java.util.Properties;
 
 public interface ConfigService {
@@ -16,5 +17,7 @@ public interface ConfigService {
 	String getYearLimit();
 	
 	File getReportFile();
+	
+	List<String> getConcatWords();
 	
 }

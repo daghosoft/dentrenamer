@@ -12,6 +12,7 @@
 			<directory>${project.basedir}</directory>
 			<outputDirectory>/</outputDirectory>
 			<includes>
+				<include>concatWords.properties</include>
 				<include>config.properties</include>
 				<include>execScript.bat</include>
 			</includes>
