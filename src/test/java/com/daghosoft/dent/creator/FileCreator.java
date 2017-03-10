@@ -18,33 +18,33 @@ public class FileCreator {
 	private static String BASEPATH = "";
 	private static final String WINDOWSPATH = "C:\\executeDent\\zzzdentRenamer";
 	private static final String MACPATH = "//uploads//FileCreator";
-	
+
 	char separator = File.separatorChar;
-	
-	@Test 
+
+	@Test
 	@Ignore
 	public void BasePathCreator() throws IOException{
 		setPath();
 		Validate.notEmpty(BASEPATH);
-		
+
 		File basePath = new File(BASEPATH);
 		if(basePath.exists()){
 			return;
 		}
-		
+
 		FileUtils.forceMkdir(basePath);
-		
-		
+
+
 	}
-	
+
 	@Test
 	@Ignore
 	public void generatefakeListFiles() throws IOException{
 		setPath();
 		Validate.notEmpty(BASEPATH);
-		
+
 		String lines[] = readFileNamePackage("/fakeFileList.txt").split("\\r?\\n");
-		
+
 		for(int x=0;x<lines.length;x++){
 			if(StringUtils.isNotBlank(lines[x])){
 				String filename = BASEPATH+separator+lines[x]+".dvx";
@@ -53,20 +53,20 @@ public class FileCreator {
 			}
 		}
 	}
-	
+
 	@Test
 	//@Ignore
 	public void generateMyMovieListFiles() throws IOException{
 		setPath();
 		Validate.notEmpty(BASEPATH);
-		
+
 		String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");
-		
+
 		for(int x=0;x<lines.length;x++){
 			if(StringUtils.isNotBlank(lines[x])){
 				String filename = BASEPATH+separator+lines[x];
 				System.out.println("Generating file : "+filename);
-				
+
 				Collection<String> ext = new ArrayList<String>();
 				ext.add(".dvx");
 				ext.add(".mp4");
@@ -81,29 +81,29 @@ public class FileCreator {
 				ext.add(".jpeg");
 				ext.add(".png");
 				ext.add(".m4v ");
-				
-				
+
+
 				boolean isFile = false;
 				for(String s : ext){
 					if(filename.toLowerCase().contains(s)){
 						isFile=true;
 					}
 				}
-				
+
 				if(isFile){
 					FileUtils.writeStringToFile(new File(filename), UUID.randomUUID().toString(), "UTF-8");
 				}else{
 					FileUtils.forceMkdir(new File(filename));
 				}
-				
+
 			}
 		}
 	}
-	
-	
+
+
 	protected String readFileNamePackage(String fileName) {
 		InputStream stream = this.getClass().getResourceAsStream(fileName);
-		
+
 		String out = StringUtils.EMPTY;
 		if (stream != null) {
 			try {
@@ -118,7 +118,7 @@ public class FileCreator {
 		}
 		return out;
 	}
-	
+
 	protected void setPath(){
 		String os = System.getProperty("os.name").toLowerCase();
 		System.out.println(os);
