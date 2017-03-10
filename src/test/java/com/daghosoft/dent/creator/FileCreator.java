@@ -10,17 +10,23 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.Validate;
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class FileCreator {
-	private static final String BASEPATH = "C:\\temp\\zzzdentRenamer";
+	private static String BASEPATH = "";
+	private static final String WINDOWSPATH = "C:\\executeDent\\zzzdentRenamer";
+	private static final String MACPATH = "//uploads//FileCreator";
 	
 	char separator = File.separatorChar;
 	
 	@Test 
 	@Ignore
 	public void BasePathCreator() throws IOException{
+		setPath();
+		Validate.notEmpty(BASEPATH);
+		
 		File basePath = new File(BASEPATH);
 		if(basePath.exists()){
 			return;
@@ -34,6 +40,9 @@ public class FileCreator {
 	@Test
 	@Ignore
 	public void generatefakeListFiles() throws IOException{
+		setPath();
+		Validate.notEmpty(BASEPATH);
+		
 		String lines[] = readFileNamePackage("/fakeFileList.txt").split("\\r?\\n");
 		
 		for(int x=0;x<lines.length;x++){
@@ -46,9 +55,11 @@ public class FileCreator {
 	}
 	
 	@Test
-	@Ignore
+	//@Ignore
 	public void generateMyMovieListFiles() throws IOException{
-	
+		setPath();
+		Validate.notEmpty(BASEPATH);
+		
 		String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");
 		
 		for(int x=0;x<lines.length;x++){
@@ -106,6 +117,16 @@ public class FileCreator {
 			}
 		}
 		return out;
+	}
+	
+	protected void setPath(){
+		String os = System.getProperty("os.name").toLowerCase();
+		System.out.println(os);
+		if(os.contains("windows")){
+			BASEPATH=WINDOWSPATH;
+		}else{
+			BASEPATH=MACPATH;
+		}
 	}
 
 }

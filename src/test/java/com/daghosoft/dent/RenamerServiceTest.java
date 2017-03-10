@@ -102,6 +102,12 @@ public class RenamerServiceTest {
 		
 		out = sut.normalizeYearSeparator("fake - fake");
 		assertThat(out).isEqualTo("fake - fake");
+		
+		out = sut.normalizeYearSeparator("fake - fake -");
+		assertThat(out).isEqualTo("fake - fake");
+		
+		out = sut.normalizeYearSeparator("fake - fake - ");
+		assertThat(out).isEqualTo("fake - fake");
 	}
 	
 	@Test
@@ -162,5 +168,43 @@ public class RenamerServiceTest {
 		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter.avi");
 	}
 	
+	@Test
+	public void removeMultipleHyphenTest(){
+		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
+		String filename = "Guardiani.Della.Galassia.2014 - - fakenotfilter.avi";
+		String out = lsut.removeMultipleHyphen(filename);
+		
+		assertThat(out).isNotEqualTo(filename);
+		assertThat(out).isEqualTo("Guardiani.Della.Galassia.2014 - fakenotfilter.avi");
+		
+		filename = "Guardiani.Della.Galassia.2014 - - - - - - - - - - - -  - fakenotfilter.avi";
+		out = lsut.removeMultipleHyphen(filename);
+		
+		assertThat(out).isNotEqualTo(filename);
+		assertThat(out).isEqualTo("Guardiani.Della.Galassia.2014 - fakenotfilter.avi");
+		
+		filename = "Guardiani.Della.Galassia.2014 - - - - - - - - - - - -  - fakenotfilter - - ";
+		out = lsut.removeMultipleHyphen(filename);
+		
+		assertThat(out).isNotEqualTo(filename);
+		assertThat(out).isEqualTo("Guardiani.Della.Galassia.2014 - fakenotfilter -");
+	}
+	
+	@Test
+	public void renameWithConfigTest(){
+		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
+		String filename = "Guardiani.Della.Galassia.2014.        ...fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita - - -.avi";
+		String out = lsut.rename(filename, true);
+		
+		assertThat(out).isNotEqualTo(filename);
+		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter -.avi");
+		
+		filename = "Guardiani- - -.Della.Galassia.2014.        ...fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.";
+		out = lsut.rename(filename, false);
+		
+		assertThat(out).isNotEqualTo(filename);
+		assertThat(out).isEqualTo("Guardiani- Della Galassia (2014) - Fakenotfilter");
+		
+	}
 	
 }

@@ -27,7 +27,7 @@ public class ConfigServiceImplTest {
 		
 		String out = sut.getWordSeparator();
 		assertThat(out).isNotNull();
-		assertThat(out).isEqualTo("-;+;_;.;[;];(;)");
+		assertThat(out).isEqualTo("+;_;.;[;];(;)");
 		
 	}
 	
@@ -45,7 +45,6 @@ public class ConfigServiceImplTest {
 		
 		String out = sut.getBasePath();
 		assertThat(out).isNotNull();
-		//assertThat(out).isEqualTo("C:\\temp\\zzzdentRenamer");
 		//assertThat(out).isEqualTo("C:\\temp\\zzzdentRenamer");
 	}
 	

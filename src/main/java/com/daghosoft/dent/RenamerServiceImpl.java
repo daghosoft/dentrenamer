@@ -99,13 +99,28 @@ public class RenamerServiceImpl implements RenamerService {
 		out = StringUtils.normalizeSpace(out);
 		//Nel caso l'anno sia subito prima dell'estenzione cancello il separatore -
 		out = normalizeYearSeparator(out);
+		//Replace dei doppi -
+		out = removeMultipleHyphen(out);
 		return out;
 	}
 	
 	protected String normalizeYearSeparator(String w){
-		String out = w.replace(" -.", ".");
+		String out = w.replace(" -.", ".").trim();
 		if(out.endsWith("-")){
-			out = out.replace("-", StringUtils.EMPTY).trim();
+			out = out.substring(0, out.lastIndexOf("-")).trim();
+		}
+		
+		return out;
+	}
+	
+	protected String removeMultipleHyphen(String w){
+		String out = w.trim();
+		out = StringUtils.normalizeSpace(out);
+		if(out.contains("- -")){
+			out = out.replace("- -", "-");
+			if(out.contains("- -")){
+				out = removeMultipleHyphen(out);
+			}
 		}
 		
 		return out;
