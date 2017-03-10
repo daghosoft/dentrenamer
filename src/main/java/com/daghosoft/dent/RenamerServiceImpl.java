@@ -65,11 +65,11 @@ public class RenamerServiceImpl implements RenamerService {
 			baseName = FilenameUtils.getBaseName(name).toLowerCase();
 			ext = "."+FilenameUtils.getExtension(name).toLowerCase();
 		}
-		LOGGER.info("!!!!!!!!!!!!!!!!!!!!!!!111 0 : [{}]",baseName);
+		LOGGER.debug("!!!!!!!!!!!!!!!!!!!!!!! 0 : [{}]",baseName);
 		baseName = concatWordsFilter(baseName);
-		LOGGER.info("1 : [{}]",baseName);
+		LOGGER.debug("1 : [{}]",baseName);
 		baseName = removeWordSeparator(baseName);
-		LOGGER.info("2 : [{}]",baseName);
+		LOGGER.debug("2 : [{}]",baseName);
 		
 		StringBuilder baseNameBuilder = new StringBuilder();
 		String[] fileNameArr = baseName.split(" ");
@@ -96,17 +96,17 @@ public class RenamerServiceImpl implements RenamerService {
 		}
 		
 		String out = baseNameBuilder.toString().trim()+ext;
-		LOGGER.info("3 : [{}]",out);
+		LOGGER.debug("3 : [{}]",out);
 		out = WordUtils.capitalizeFully(out);
-		LOGGER.info("4 : [{}]",out);
+		LOGGER.debug("4 : [{}]",out);
 		out = StringUtils.normalizeSpace(out);
-		LOGGER.info("5 : [{}]",out);
+		LOGGER.debug("5 : [{}]",out);
 		//Replace dei doppi -
 		out = removeMultipleHyphen(out);
-		LOGGER.info("6 : [{}]",out);
+		LOGGER.debug("6 : [{}]",out);
 		//Nel caso l'anno sia subito prima dell'estenzione cancello il separatore -
 		out = normalizeYearSeparator(out);
-		LOGGER.info("7 : [{}]",out);
+		LOGGER.debug("7 : [{}]",out);
 		
 		return out;
 	}
@@ -178,8 +178,9 @@ public class RenamerServiceImpl implements RenamerService {
 	protected String concatWordsFilter(String fileName){
 		String out = fileName.toLowerCase();
 		for(String s : concatWordslist){
-			if(out.contains(s.toLowerCase())){
-				out = out.replace(s.toLowerCase(), "");	
+			s = s.toLowerCase();
+			if(out.contains(s)){
+				out = out.replace(s, "");	
 				LOGGER.debug("###### String found : {}",s);
 			}
 		}
