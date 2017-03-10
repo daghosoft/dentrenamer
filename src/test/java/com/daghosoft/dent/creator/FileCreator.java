@@ -55,7 +55,7 @@ public class FileCreator {
 	}
 
 	@Test
-	//@Ignore
+	@Ignore
 	public void generateMyMovieListFiles() throws IOException{
 		setPath();
 		Validate.notEmpty(BASEPATH);
