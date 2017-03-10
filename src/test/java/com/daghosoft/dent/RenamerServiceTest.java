@@ -193,17 +193,21 @@ public class RenamerServiceTest {
 	@Test
 	public void renameWithConfigTest(){
 		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
-		String filename = "Guardiani.Della.Galassia.2014.        ...fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita - - -.avi";
+		String filename = "Guardiani.Della.Galassia.2014.        ...fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita - - - T.avi";
 		String out = lsut.rename(filename, true);
 		
 		assertThat(out).isNotEqualTo(filename);
-		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter -.avi");
+		assertThat(out).isEqualTo("Guardiani Della Galassia (2014) - Fakenotfilter - T.avi");
 		
 		filename = "Guardiani- - -.Della.Galassia.2014.        ...fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.";
 		out = lsut.rename(filename, false);
 		
 		assertThat(out).isNotEqualTo(filename);
 		assertThat(out).isEqualTo("Guardiani- Della Galassia (2014) - Fakenotfilter");
+		
+		filename = "Benvenuti A Ieri - Project Almanac (2014) - Ita Eng Ita Eng Mircrew Eng.srt";
+		out = sut.rename(filename,true);
+		assertThat(out).isEqualTo("Benvenuti A Ieri - Project Almanac (2014).srt");
 		
 	}
 	
