@@ -197,21 +197,21 @@ public class RenamerServiceImpl implements RenamerService {
 		
 		return out;
 	}
-	
+	//FIXME da sistemare
 	public Boolean fileNameNeedRename(String filename){
-		Boolean out = false;
+		Boolean out = true;
 		
-		for(String blackWord : wordSeparatorlist){
-			if(filename.contains(blackWord)){
-				return true;
-			}
-		}
-		
-		for(String blackWord : blackList){
-			if(filename.contains(blackWord)){
-				return true;
-			}
-		}
+//		for(String blackWord : wordSeparatorlist){
+//			if(filename.contains(blackWord)){
+//				return true;
+//			}
+//		}
+//		
+//		for(String blackWord : blackList){
+//			if(filename.contains(blackWord)){
+//				return true;
+//			}
+//		}
 		
 		return out;
 	}

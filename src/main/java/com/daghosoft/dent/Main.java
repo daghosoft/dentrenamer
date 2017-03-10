@@ -76,8 +76,9 @@ public class Main {
 			 try {
 				 File targetFolder = new File(containingPath+separator+targetName);
 				 writeLineInReport(name, targetName);
+				 LOGGER.info(" Folder Original Name : [{}] Target Name : [{}]",name,targetName);
 				 if(!targetFolder.exists()){
-					 LOGGER.debug(" Folder Original Name : [{}] Target Name : [{}]",name,targetName);
+					 LOGGER.info(" Folder Original Name : [{}] Target Name : [{}]",name,targetName);
 					 if(f.isDirectory() && execute){
 						 FileUtils.moveDirectory(f, targetFolder); 
 					 }
@@ -98,7 +99,7 @@ public class Main {
 			 report.delete();
 		 }
 		 try {
-			StringBuilder headerBuilder = new StringBuilder("Dent renamer eseguito in modalita  report @ ")
+			StringBuilder headerBuilder = new StringBuilder("Dent renamer eseguito in modalitaï¿½ report @ ")
 			 									.append(new Date().toString())
 			 									.append(" - Per eseguire il rename dei file utilizzare parametro [exec]")
 			 									.append("\n");
