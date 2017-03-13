@@ -40,7 +40,7 @@ public class FileServiceImplTest {
 		sut = new FileServiceImpl(config.getBasePath(),renamerService);
 		Collection<File> out = sut.getFolderInBasePath();
 		for(File f : out){
-			System.out.println("!!!!"+f.getAbsolutePath());
+			//System.out.println("!!!!"+f.getAbsolutePath());
 			assertThat(f.isDirectory()).isTrue();
 			assertThat(f).isNotEqualTo(basePath);
 		}
