@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.util.Collection;
 
+import org.hamcrest.core.IsNot;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,10 +36,13 @@ public class FileServiceImplTest {
 	
 	@Test
 	public void getFolderInBasePathTest(){
+		File basePath = new File(config.getBasePath());
 		sut = new FileServiceImpl(config.getBasePath(),renamerService);
 		Collection<File> out = sut.getFolderInBasePath();
 		for(File f : out){
+			System.out.println("!!!!"+f.getAbsolutePath());
 			assertThat(f.isDirectory()).isTrue();
+			assertThat(f).isNotEqualTo(basePath);
 		}
 	}
 	

@@ -68,14 +68,16 @@ public class FileServiceImpl implements FileService{
 		Collection<File> list = FileUtils.listFilesAndDirs(folder, new NotFileFilter(TrueFileFilter.INSTANCE), DirectoryFileFilter.DIRECTORY);
 		
 		for(File f : list){
-			
-			if(f.isDirectory()){
+			if(f.isDirectory() && f!=folder){
 				if(renamerService.fileNameNeedRename(f.getName())){
 					out.add(f);	
 					LOGGER.debug("Folder Need Rename : [{}]",f.getName());
 				}
 			}else{
-				LOGGER.info("Filtro cartelle sbagliato individuato file [{}]",f.getName());
+				if(!f.isDirectory()){
+					LOGGER.info("Filtro cartelle sbagliato individuato file [{}]",f.getAbsolutePath());
+				}
+				
 			}
 		}
 		
