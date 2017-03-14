@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -29,11 +28,18 @@ public class ConfigServiceImpl implements ConfigService {
 	
 	private Properties properties;
 	
-	public ConfigServiceImpl() {
-		URL config = this.getClass().getResource("/config.properties");
+	
+	//Costruttore di test
+	protected ConfigServiceImpl(String pConfigName) {
+		super();
+		if(!pConfigName.startsWith("/")){
+			pConfigName = "/"+pConfigName;
+		}
+		
+		URL config = this.getClass().getResource(pConfigName);
 		
 		Validate.notNull(config,"Errore recupero file di configurazione config.properties");
-		
+		LOGGER.debug("Load config from : [{}]",config.getPath());
 			try {
 				File fconfig = new File(config.getPath());
 				execPath = FilenameUtils.getFullPathNoEndSeparator(fconfig.getAbsolutePath());
@@ -46,6 +52,10 @@ public class ConfigServiceImpl implements ConfigService {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+	}
+
+	public ConfigServiceImpl() {
+		this("/config.properties");
 	}
 
 	@Override

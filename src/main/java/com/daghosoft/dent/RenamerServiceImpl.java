@@ -2,7 +2,6 @@ package com.daghosoft.dent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -22,6 +21,7 @@ public class RenamerServiceImpl implements RenamerService {
 	
 	//Costruttore di test
 	protected RenamerServiceImpl(String pBlackList,String pWordSeparator,String pYearLimit) {
+		super();
 		String [] arr = pBlackList.toLowerCase().split(";");
 		blackList = Arrays.asList(arr);
 		
@@ -37,24 +37,8 @@ public class RenamerServiceImpl implements RenamerService {
 	
 	public RenamerServiceImpl(ConfigService configService) {
 		
-		String pBlackList = configService.getBlackList();
-		String pWordSeparator =  configService.getWordSeparator();
-		
+		this(configService.getBlackList(),configService.getWordSeparator(),configService.getYearLimit());
 		concatWordslist = configService.getConcatWords();
-		
-		String [] arr = pBlackList.toLowerCase().split(";");
-		blackList = Arrays.asList(arr);
-		
-		String [] ws = pWordSeparator.split(";");
-		wordSeparatorlist = Arrays.asList(ws);
-		
-		
-		
-		try {
-			yearLimit = Integer.valueOf(configService.getYearLimit());
-		} catch (Exception e) {
-		}
-		
 	}
 	
 	public String rename(final String name,Boolean isFile) {

@@ -1,21 +1,19 @@
 package com.daghosoft.dent;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class ConfigServiceImplTest {
 	
-	ConfigService sut = new ConfigServiceImpl();
+	ConfigService sut = new ConfigServiceImpl("/configTest.properties");
 	
 	@Test
 	public void getPropertySetTest(){
-		
 		Properties out = sut.getPropertySet();
 		assertThat(out).isNotNull();
 		assertThat(out.get("test")).isEqualTo("fakeString");
@@ -24,28 +22,23 @@ public class ConfigServiceImplTest {
 	
 	@Test
 	public void getWordSeparatorTest(){
-		
 		String out = sut.getWordSeparator();
 		assertThat(out).isNotNull();
 		assertThat(out).isEqualTo("+;_;.;[;];(;)");
-		
 	}
 	
 	@Test
 	public void getBlackListTest(){
-		
 		String out = sut.getBlackList();
 		assertThat(out).isNotNull();
 		assertThat(out).isEqualTo("BDRip;XviD;TRL;MT;sub;dvx;blueRay;");
-		
 	}
 	
 	@Test
 	public void getBasePathTest(){
-		
 		String out = sut.getBasePath();
 		assertThat(out).isNotNull();
-		//assertThat(out).isEqualTo("C:\\temp\\zzzdentRenamer");
+		assertThat(out).isEqualTo(".//target//fakePath//FileCreator");
 	}
 	
 	@Test

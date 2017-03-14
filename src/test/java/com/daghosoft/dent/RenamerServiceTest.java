@@ -2,6 +2,7 @@ package com.daghosoft.dent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -12,6 +13,12 @@ public class RenamerServiceTest {
 	private static final String YEARLIMIT = "1900";
 	
 	private RenamerServiceImpl sut = new RenamerServiceImpl(BLACKLISTPARAM,WORDSEPARATORPARAM,YEARLIMIT);
+	private ConfigServiceImpl config;
+	
+	@Before
+	public void init(){
+		config = new ConfigServiceImpl("configTest.properties");
+	}
 	
 	@Test
 	public void renameFile(){
@@ -151,7 +158,7 @@ public class RenamerServiceTest {
 	
 	@Test
 	public void concatWordsFilterTest(){
-		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
+		RenamerServiceImpl lsut = new RenamerServiceImpl(config);
 		String filename = "Guardiani.Della.Galassia.2014.fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.avi";
 		String out = lsut.concatWordsFilter(filename);
 		
@@ -161,7 +168,7 @@ public class RenamerServiceTest {
 	
 	@Test
 	public void renameConcatWordsFilterTest(){
-		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
+		RenamerServiceImpl lsut = new RenamerServiceImpl(config);
 		String filename = "Guardiani.Della.Galassia.2014.fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita.dvx.blueRay.avi";
 		String out = lsut.rename(filename,true);
 		
@@ -171,7 +178,7 @@ public class RenamerServiceTest {
 	
 	@Test
 	public void removeMultipleHyphenTest(){
-		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
+		RenamerServiceImpl lsut = new RenamerServiceImpl(config);
 		String filename = "Guardiani.Della.Galassia.2014 - - fakenotfilter.avi";
 		String out = lsut.removeMultipleHyphen(filename);
 		
@@ -193,7 +200,7 @@ public class RenamerServiceTest {
 	
 	@Test
 	public void renameWithConfigTest(){
-		RenamerServiceImpl lsut = new RenamerServiceImpl(new ConfigServiceImpl());
+		RenamerServiceImpl lsut = new RenamerServiceImpl(config);
 		String filename = "Guardiani.Della.Galassia.2014.        ...fakenotfilter.iTALiAN.BDRip.XviD-TRL[MT]_DVDrip+sub.ita - - - T.avi";
 		String out = lsut.rename(filename, true);
 		

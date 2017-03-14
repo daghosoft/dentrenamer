@@ -3,9 +3,11 @@ package com.daghosoft.dent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 
-import org.hamcrest.core.IsNot;
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,9 +21,10 @@ public class FileServiceImplTest {
 	
 	
 	@Before
-	public void init(){
-		config =  new ConfigServiceImpl();
+	public void init() throws IOException{
+		config =  new ConfigServiceImpl("configTest.properties");
 		renamerService = new RenamerServiceImpl(config);
+		preFolders();
 	}
 	
 	
@@ -31,6 +34,7 @@ public class FileServiceImplTest {
 		Collection<File> out = sut.getFilesInBasePath();
 		for(File f : out){
 			assertThat(f.isDirectory()).isFalse();
+			System.out.println("getFilesInBasePathTest "+f.getAbsolutePath());
 		}
 	}
 	
@@ -40,9 +44,9 @@ public class FileServiceImplTest {
 		sut = new FileServiceImpl(config.getBasePath(),renamerService);
 		Collection<File> out = sut.getFolderInBasePath();
 		for(File f : out){
-			//System.out.println("!!!!"+f.getAbsolutePath());
 			assertThat(f.isDirectory()).isTrue();
 			assertThat(f).isNotEqualTo(basePath);
+			System.out.println("getFolderInBasePathTest "+f.getAbsolutePath());
 		}
 	}
 	
@@ -65,6 +69,33 @@ public class FileServiceImplTest {
 		sut.getFilesInBasePath();
 	}
 	
+	private void preFolders() throws IOException{
+		
+		File basePath = new File(config.getBasePath());
+		
+		if(basePath.exists()){
+			basePath.delete();
+		}
+		
+		FileUtils.forceMkdir(basePath);
+		FileUtils.forceMkdir(new File(config.getBasePath()+File.separatorChar+"fakeFoldersub"));
+		FileUtils.forceMkdir(new File(config.getBasePath()+File.separatorChar+"fakeFoldersub1"));
+		FileUtils.forceMkdir(new File(config.getBasePath()+File.separatorChar+"fakeFoldersub2"));
+		
+		new File(config.getBasePath()+File.separatorChar+"test.txt").createNewFile();
+		new File(config.getBasePath()+File.separatorChar+"test1.txt").createNewFile();
+		new File(config.getBasePath()+File.separatorChar+"test2.txt").createNewFile();
+	}
 	
+	@After
+	public void postFolders() throws IOException{
+		
+		File basePath = new File(config.getBasePath());
+		
+		if(basePath.exists()){
+			FileUtils.deleteDirectory(basePath);
+		}
+		
+	}
 
 }

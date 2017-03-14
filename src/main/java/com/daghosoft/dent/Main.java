@@ -78,7 +78,6 @@ public class Main {
 				 writeLineInReport(name, targetName);
 				 LOGGER.debug(" Folder Original Name : [{}] Target Name : [{}]",name,targetName);
 				 if(!targetFolder.exists()){
-					 LOGGER.info(" Folder Original Name : [{}] Target Name : [{}]",name,targetName);
 					 if(f.isDirectory() && execute){
 						 FileUtils.moveDirectory(f, targetFolder); 
 					 }
