@@ -32,6 +32,7 @@ public class FileServiceImplTest {
 	public void getFilesInBasePathTest(){
 		sut = new FileServiceImpl(config.getBasePath(),renamerService);
 		Collection<File> out = sut.getFilesInBasePath();
+		assertThat(out.size()).isGreaterThan(0);
 		for(File f : out){
 			assertThat(f.isDirectory()).isFalse();
 			System.out.println("getFilesInBasePathTest "+f.getAbsolutePath());
@@ -43,6 +44,7 @@ public class FileServiceImplTest {
 		File basePath = new File(config.getBasePath());
 		sut = new FileServiceImpl(config.getBasePath(),renamerService);
 		Collection<File> out = sut.getFolderInBasePath();
+		assertThat(out.size()).isGreaterThan(0);
 		for(File f : out){
 			assertThat(f.isDirectory()).isTrue();
 			assertThat(f).isNotEqualTo(basePath);
@@ -81,6 +83,8 @@ public class FileServiceImplTest {
 		FileUtils.forceMkdir(new File(config.getBasePath()+File.separatorChar+"fakeFoldersub"));
 		FileUtils.forceMkdir(new File(config.getBasePath()+File.separatorChar+"fakeFoldersub1"));
 		FileUtils.forceMkdir(new File(config.getBasePath()+File.separatorChar+"fakeFoldersub2"));
+		FileUtils.forceMkdir(new File(config.getBasePath()+File.separatorChar+"@eardir"));
+		FileUtils.forceMkdir(new File(config.getBasePath()+File.separatorChar+"#recycle"));
 		
 		new File(config.getBasePath()+File.separatorChar+"test.txt").createNewFile();
 		new File(config.getBasePath()+File.separatorChar+"test1.txt").createNewFile();

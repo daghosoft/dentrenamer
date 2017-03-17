@@ -2,10 +2,15 @@ package com.daghosoft.dent;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.comparator.DirectoryFileComparator;
+import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang.Validate;
@@ -63,9 +68,8 @@ public class FileServiceImpl implements FileService{
 		Validate.isTrue(folder.isDirectory(),"Il path fornito non e una directory: "+basePath);
 
 		Collection<File> out = new ArrayList<File>();
-		
 		// Lista solo delle cartelle
-		Collection<File> list = FileUtils.listFilesAndDirs(folder, new NotFileFilter(TrueFileFilter.INSTANCE), DirectoryFileFilter.DIRECTORY);
+		Collection<File> list = FileUtils.listFilesAndDirs(folder, folderFilter(), DirectoryFileFilter.DIRECTORY);
 		
 		for(File f : list){
 			if(f.isDirectory() && f!=folder){
@@ -82,6 +86,44 @@ public class FileServiceImpl implements FileService{
 		}
 		
 		return out;
+	}
+	
+	
+	private IOFileFilter folderFilter(){
+		
+		
+		
+		IOFileFilter folderFilter = new IOFileFilter() {
+			
+			@Override
+			public boolean accept(File dir, String name) {
+				if(dir.isDirectory() && isValid(dir.getAbsolutePath())){
+					System.out.println("-------------/\\//---------"+dir.getAbsolutePath());
+					return true;
+				}
+				return false;
+			}
+			
+			@Override
+			public boolean accept(File file) {
+				if(file.isDirectory()&& isValid(file.getAbsolutePath())){
+					System.out.println("-------------/\\//---------"+file.getAbsolutePath());
+					return true;
+				}
+				return false;
+			}
+		};
+		return folderFilter;
+	}
+	
+	protected Boolean isValid(String path){
+		List<String> filter = Arrays.asList("@ear;#recycle".split(";"));
+		for(String s : filter){
+			if(path.contains(s)){
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

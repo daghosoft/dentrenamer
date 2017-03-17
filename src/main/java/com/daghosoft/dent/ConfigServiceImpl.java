@@ -24,6 +24,7 @@ public class ConfigServiceImpl implements ConfigService {
 	private static final String BLACKLIST = "word.blacklist";
 	private static final String YEARLIMIT = "word.year.limit";
 	private static final String BASEPATH = "file.basePath";
+	private static final String EXCLUSIONPATH ="file.exclusion.path";
 	private static String execPath;
 	
 	private Properties properties;
@@ -80,6 +81,15 @@ public class ConfigServiceImpl implements ConfigService {
 		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
 		return ((String) properties.get(BASEPATH)).trim();
 	}
+	
+	@Override
+	public String getExclusionPath() {
+		Validate.notNull(properties,"l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
+		return ((String) properties.get(EXCLUSIONPATH)).trim();
+	}
+	
+	
+	
 	
 	@Override
 	public String getYearLimit() {

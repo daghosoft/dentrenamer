@@ -14,6 +14,8 @@ public interface ConfigService {
 	
 	String getBasePath();
 	
+	String getExclusionPath();
+	
 	String getYearLimit();
 	
 	File getReportFile();

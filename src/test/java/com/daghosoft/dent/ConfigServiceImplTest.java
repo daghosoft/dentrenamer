@@ -42,6 +42,16 @@ public class ConfigServiceImplTest {
 	}
 	
 	@Test
+	public void getExclusionPathTest(){
+		String out = sut.getExclusionPath();
+		assertThat(out).isNotNull();
+		assertThat(out).isEqualTo("@ear;#recycle");
+	}
+	
+	
+	
+	
+	@Test
 	public void getYearLimitTest(){
 		String out = sut.getYearLimit();
 		assertThat(out).isNotNull();
