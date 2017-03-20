@@ -24,51 +24,70 @@ public class FileServiceImplTest {
 	public void init() throws IOException{
 		config =  new ConfigServiceImpl("configTest.properties");
 		renamerService = new RenamerServiceImpl(config);
+		sut = new FileServiceImpl(config,renamerService);
 		preFolders();
 	}
 	
 	
 	@Test
 	public void getFilesInBasePathTest(){
-		sut = new FileServiceImpl(config.getBasePath(),renamerService);
 		Collection<File> out = sut.getFilesInBasePath();
 		assertThat(out.size()).isGreaterThan(0);
 		for(File f : out){
 			assertThat(f.isDirectory()).isFalse();
-			System.out.println("getFilesInBasePathTest "+f.getAbsolutePath());
+			//assertThat(sut.isValidByExclusionPath(f.getAbsolutePath())).isTrue();
 		}
 	}
 	
 	@Test
 	public void getFolderInBasePathTest(){
 		File basePath = new File(config.getBasePath());
-		sut = new FileServiceImpl(config.getBasePath(),renamerService);
 		Collection<File> out = sut.getFolderInBasePath();
 		assertThat(out.size()).isGreaterThan(0);
 		for(File f : out){
 			assertThat(f.isDirectory()).isTrue();
 			assertThat(f).isNotEqualTo(basePath);
-			System.out.println("getFolderInBasePathTest "+f.getAbsolutePath());
+			System.out.println("-------- : "+f.getAbsolutePath());
+			//assertThat(sut.isValidByExclusionPath(f.getAbsolutePath())).isTrue();
+			
 		}
 	}
 	
 	
 	@Test(expected=java.lang.IllegalArgumentException.class)
 	public void exceptionNotExistTest(){
-		sut = new FileServiceImpl("xxx",renamerService);
+		sut = new FileServiceImpl(config,renamerService);
+		sut.setBasePath("xxx");
 		sut.getFilesInBasePath();
 	}
 	
 	@Test(expected=java.lang.IllegalArgumentException.class)
 	public void exceptionEmptyTest(){
-		sut = new FileServiceImpl("",renamerService);
+		sut = new FileServiceImpl(config,renamerService);
+		sut.setBasePath("");
 		sut.getFilesInBasePath();
 	}
 	
 	@Test(expected=java.lang.IllegalArgumentException.class)
 	public void exceptionNullTest(){
-		sut = new FileServiceImpl(null,renamerService);
+		sut = new FileServiceImpl(config,renamerService);
+		sut.setBasePath(null);
 		sut.getFilesInBasePath();
+	}
+	
+	@Test
+	public void isValidByExclusionPathTest(){
+		
+		File folder1 = new File(config.getBasePath()+File.separatorChar+"@eardir");
+		File folder2 = new File(config.getBasePath()+File.separatorChar+"fakeFoldersub2");
+		
+		Boolean out = sut.isValidByExclusionPath(folder1.getAbsolutePath());
+		assertThat(folder1.isDirectory()).isTrue();
+		assertThat(out).isFalse();
+		
+		out = sut.isValidByExclusionPath(folder2.getAbsolutePath());
+		assertThat(folder2.isDirectory()).isTrue();
+		assertThat(out).isTrue();
 	}
 	
 	private void preFolders() throws IOException{
@@ -89,6 +108,7 @@ public class FileServiceImplTest {
 		new File(config.getBasePath()+File.separatorChar+"test.txt").createNewFile();
 		new File(config.getBasePath()+File.separatorChar+"test1.txt").createNewFile();
 		new File(config.getBasePath()+File.separatorChar+"test2.txt").createNewFile();
+		new File(config.getBasePath()+File.separatorChar+"#recycle"+File.separatorChar+"test2.txt").createNewFile();
 	}
 	
 	@After

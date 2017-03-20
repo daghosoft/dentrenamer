@@ -1,3 +1,6 @@
+@eardir
+#recycle
+
 Cartoni
 Film
 HarryPotter

@@ -10,9 +10,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.DirectoryFileComparator;
 import org.apache.commons.io.filefilter.AbstractFileFilter;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +26,18 @@ public class FileServiceImpl implements FileService{
 	
 	private String basePath;
 	private RenamerService renamerService;
+	private String exclusionPath;
 
-	public FileServiceImpl(String pBasePath,RenamerService pRenamerService) {
-		basePath = pBasePath;
+	
+	protected FileServiceImpl(ConfigService config,RenamerService pRenamerService) {
+		basePath = config.getBasePath();
 		LOGGER.info("BasePath is : [{}]",basePath);
+		
+		exclusionPath = config.getExclusionPath();
 		renamerService = pRenamerService;
 	}
+
+	
 	
 	public Collection<File> getFilesInBasePath() {
 		Validate.notNull(basePath,"Il BasePath e nullo o vuoto");
@@ -68,8 +77,9 @@ public class FileServiceImpl implements FileService{
 		Validate.isTrue(folder.isDirectory(),"Il path fornito non e una directory: "+basePath);
 
 		Collection<File> out = new ArrayList<File>();
+		
 		// Lista solo delle cartelle
-		Collection<File> list = FileUtils.listFilesAndDirs(folder, folderFilter(), DirectoryFileFilter.DIRECTORY);
+		Collection<File> list = FileUtils.listFilesAndDirs(folder, new NotFileFilter(TrueFileFilter.INSTANCE), DirectoryFileFilter.DIRECTORY);
 		
 		for(File f : list){
 			if(f.isDirectory() && f!=folder){
@@ -88,42 +98,40 @@ public class FileServiceImpl implements FileService{
 		return out;
 	}
 	
-	
-	private IOFileFilter folderFilter(){
+	protected Boolean isValidByExclusionPath(String path){
 		
+		if(StringUtils.isBlank(exclusionPath)){
+			return true;
+		}
 		
-		
-		IOFileFilter folderFilter = new IOFileFilter() {
-			
-			@Override
-			public boolean accept(File dir, String name) {
-				if(dir.isDirectory() && isValid(dir.getAbsolutePath())){
-					System.out.println("-------------/\\//---------"+dir.getAbsolutePath());
-					return true;
-				}
-				return false;
-			}
-			
-			@Override
-			public boolean accept(File file) {
-				if(file.isDirectory()&& isValid(file.getAbsolutePath())){
-					System.out.println("-------------/\\//---------"+file.getAbsolutePath());
-					return true;
-				}
-				return false;
-			}
-		};
-		return folderFilter;
-	}
-	
-	protected Boolean isValid(String path){
-		List<String> filter = Arrays.asList("@ear;#recycle".split(";"));
+		List<String> filter = Arrays.asList(exclusionPath.split(";"));
 		for(String s : filter){
 			if(path.contains(s)){
+				System.out.println("PAth not valid : "+path);
 				return false;
 			}
 		}
 		return true;
 	}
 
+
+
+	/**
+	 * A scopo di test
+	 */
+	protected void setBasePath(String basePath) {
+		this.basePath = basePath;
+	}
+
+
+
+	/**
+	 * A scopo di test
+	 */
+	protected void setExclusionPath(String exclusionPath) {
+		this.exclusionPath = exclusionPath;
+	}
+
+	
+	
 }

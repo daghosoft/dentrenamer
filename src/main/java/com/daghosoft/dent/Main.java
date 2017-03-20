@@ -35,7 +35,7 @@ public class Main {
 		 
 		 config = new ConfigServiceImpl();
 		 renamerService = new RenamerServiceImpl(config);
-		 FileService fileService = new FileServiceImpl(config.getBasePath(),renamerService);
+		 FileService fileService = new FileServiceImpl(config,renamerService);
 		 
 		 initReport();
 		 
@@ -98,7 +98,7 @@ public class Main {
 			 report.delete();
 		 }
 		 try {
-			StringBuilder headerBuilder = new StringBuilder("Dent renamer eseguito in modalita� report @ ")
+			StringBuilder headerBuilder = new StringBuilder("Dent renamer eseguito in modalitaa report @ ")
 			 									.append(new Date().toString())
 			 									.append(" - Per eseguire il rename dei file utilizzare parametro [exec]")
 			 									.append("\n");
