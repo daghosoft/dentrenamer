@@ -31,7 +31,7 @@ public class FileServiceImpl implements FileService{
 	
 	protected FileServiceImpl(ConfigService config,RenamerService pRenamerService) {
 		basePath = config.getBasePath();
-		LOGGER.info("BasePath is : [{}]",basePath);
+		LOGGER.debug("BasePath is : [{}]",basePath);
 		
 		exclusionPath = config.getExclusionPath();
 		renamerService = pRenamerService;
@@ -56,11 +56,13 @@ public class FileServiceImpl implements FileService{
 		for(File f : list){
 			if(!f.isDirectory()){
 				if(renamerService.fileNameNeedRename(f.getName())){
-					out.add(f);	
-					LOGGER.debug("File Need Rename : [{}]",f.getName());
+					if(isValidByExclusionPath(f.getAbsolutePath())){
+						out.add(f);	
+						LOGGER.debug("File [{}] is valid adding to list.",f.getName());
+					}
 				}
 			}else{
-				LOGGER.info("Filtro file sbagliato individuata cartella [{}]",f.getName());
+				LOGGER.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Filtro file sbagliato individuata cartella [{}]",f.getName());
 			}
 		}
 		
@@ -84,12 +86,14 @@ public class FileServiceImpl implements FileService{
 		for(File f : list){
 			if(f.isDirectory() && f!=folder){
 				if(renamerService.fileNameNeedRename(f.getName())){
-					out.add(f);	
-					LOGGER.debug("Folder Need Rename : [{}]",f.getName());
+					if(isValidByExclusionPath(f.getAbsolutePath())){
+						out.add(f);	
+						LOGGER.debug("Folder [{}] is valid adding to list.",f.getName());
+					}
 				}
 			}else{
 				if(!f.isDirectory()){
-					LOGGER.info("Filtro cartelle sbagliato individuato file [{}]",f.getAbsolutePath());
+					LOGGER.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Filtro cartelle sbagliato individuato file [{}]",f.getName());
 				}
 				
 			}
@@ -107,7 +111,7 @@ public class FileServiceImpl implements FileService{
 		List<String> filter = Arrays.asList(exclusionPath.split(";"));
 		for(String s : filter){
 			if(path.contains(s)){
-				System.out.println("PAth not valid : "+path);
+				LOGGER.debug("Path excluded by rule : [{}]",path);
 				return false;
 			}
 		}

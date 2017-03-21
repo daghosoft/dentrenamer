@@ -35,7 +35,7 @@ public class FileServiceImplTest {
 		assertThat(out.size()).isGreaterThan(0);
 		for(File f : out){
 			assertThat(f.isDirectory()).isFalse();
-			//assertThat(sut.isValidByExclusionPath(f.getAbsolutePath())).isTrue();
+			assertThat(sut.isValidByExclusionPath(f.getAbsolutePath())).isTrue();
 		}
 	}
 	
@@ -47,9 +47,7 @@ public class FileServiceImplTest {
 		for(File f : out){
 			assertThat(f.isDirectory()).isTrue();
 			assertThat(f).isNotEqualTo(basePath);
-			System.out.println("-------- : "+f.getAbsolutePath());
-			//assertThat(sut.isValidByExclusionPath(f.getAbsolutePath())).isTrue();
-			
+			assertThat(sut.isValidByExclusionPath(f.getAbsolutePath())).isTrue();
 		}
 	}
 	

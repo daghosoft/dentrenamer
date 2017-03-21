@@ -1,5 +1,11 @@
 @eardir
+@eardir//Alice nel Paese delle Meraviglie (1951) [Mux by Little-Boy].mp4
+@eardir//Chi.ha.incastrato.Roger.Rabbit.1988.mkv
+@eardir//11 Star Trek XI - Il futuro ha inizio (2009).ita.eng.sub.ita.eng.MIRCrew
+
 #recycle
+#recycle//Il.Gatto.Con.Gli.Stivali.2011.iTALiAN.BDRip.XviD-Twice.avi
+#recycle//Dumbo-2009.avi
 
 Cartoni
 Film
@@ -10,7 +16,7 @@ Super eroi
 Tarantino
 
 Aladdin
-Alice nel Paese delle Meraviglie (1951) [Mux by Little-Boy].mp4
+
 ALLA RICERCA DI NEMO.avi
 Astro.Boy.avi
 Biancaneve e i sette nani.avi
@@ -19,11 +25,11 @@ Bolt.Un.Eroe.A.Quattro.Zampe.2008.avi
 Cars 1-2
 Cattivissimo.Me
 Cenerentola
-Chi.ha.incastrato.Roger.Rabbit.1988.mkv
+
 Daltanius
 Dragon trainers
 Duck tales
-Dumbo-2009.avi
+
 Epic.mp4
 Evangelion
 Frozen -  il regno di ghiaccio.mkv
@@ -34,7 +40,7 @@ Home.A.Casa.2015.avi
 Hotel.Transylvania
 i capolavori del cinema di animazione Miyazaki
 I Croods - The Croods 2013
-Il.Gatto.Con.Gli.Stivali.2011.iTALiAN.BDRip.XviD-Twice.avi
+
 Il libro della giungla
 Il Piccolo Principe - Le Petit Prince - 2015
 Il viaggio di Arlo - The Good Dinosaur 2015
@@ -570,7 +576,7 @@ Sherlock.Holmes.Gioco.Di.Ombre.iTALiAN.2011.LD.BRRiP.720p.x264-TrTd_TeaM.mkv
 LEGGIMI.txt
 Snowpiercer.2013.iTALiAN.MD.BDRip.x264-REV.mkv
 
-11 Star Trek XI - Il futuro ha inizio (2009).ita.eng.sub.ita.eng.MIRCrew
+
 Star.Trek.Beyond.2016.ITA.ENG.720p.BDMux.x264-sp_54321
 Star.Trek.Into.Darkness.2013.iTALiAN.AC3.BRRip.XviD-T4P3.avi
 

@@ -45,7 +45,7 @@ public class ConfigServiceImplTest {
 	public void getExclusionPathTest(){
 		String out = sut.getExclusionPath();
 		assertThat(out).isNotNull();
-		assertThat(out).isEqualTo("@ear;#recycle");
+		assertThat(out).isEqualTo("@eardir;#recycle");
 	}
 	
 	
