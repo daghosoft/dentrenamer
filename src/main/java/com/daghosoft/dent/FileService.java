@@ -5,7 +5,9 @@ import java.util.Collection;
 
 public interface FileService {
 
-	Collection<File> getFilesInBasePath();
-	
-	Collection<File> getFolderInBasePath();
+    Collection<File> getFilesInBasePath();
+
+    Collection<File> getFolderInBasePath();
+
+    boolean isValidByExclusionPath(String path);
 }
