@@ -7,12 +7,11 @@ import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class RenamerServiceImpl implements RenamerService {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(FileServiceImpl.class);
 
     private static Set<String> blackList = new HashSet<>();
     private static Set<String> wordSeparatorlist = new HashSet<>();
@@ -164,7 +163,7 @@ public class RenamerServiceImpl implements RenamerService {
         for (String s : concatWordslist) {
             s = s.toLowerCase();
             if (out.contains(s)) {
-                out = out.replace(s, "");
+                out = out.replace(s, StringUtils.EMPTY);
                 LOGGER.debug("###### String found : {}", s);
             }
         }

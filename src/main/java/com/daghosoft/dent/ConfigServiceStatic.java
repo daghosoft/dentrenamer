@@ -15,12 +15,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class ConfigServiceStatic {
-
-    private static Logger LOGGER = LoggerFactory.getLogger(FileServiceImpl.class);
 
     private static final String CONFIGNAME = "/config.properties";
     private static final String WORDSEPARATOR = "word.separator";

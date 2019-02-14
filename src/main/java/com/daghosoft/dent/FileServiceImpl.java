@@ -10,40 +10,40 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class FileServiceImpl implements FileService {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(FileServiceImpl.class);
-
     private String basePath;
-    private String exclusionPath;
+    private List<String> filter;
 
     protected ConfigServiceStatic config;
 
     protected FileServiceImpl() {
         config = ConfigServiceStatic.getConfig();
         basePath = config.getBasePath();
-        exclusionPath = config.getExclusionPath();
+        String exclusionPath = config.getExclusionPath();
+        filter = new ArrayList<>();
+        if (exclusionPath.contains(";")) {
+            filter = Arrays.asList(exclusionPath.split(";"));
+        }
+
     }
 
     @Override
     public Collection<File> getFilesInBasePath() {
-        Validate.notNull(basePath, "Il BasePath e nullo o vuoto");
         Validate.notEmpty(basePath, "Il BasePath e nullo o vuoto");
 
         File folder = new File(basePath);
         Validate.isTrue(folder.exists(), "Il path fornito non esiste : " + basePath);
         Validate.isTrue(folder.isDirectory(), "Il path fornito non e una directory: " + basePath);
 
-        Collection<File> out = new ArrayList<File>();
-
         // Lista solo dei file compresi nel basepath
         Collection<File> list = FileUtils.listFiles(folder, TrueFileFilter.TRUE, DirectoryFileFilter.INSTANCE);
-
+        Collection<File> out = new ArrayList<>(list.size());
         for (File f : list) {
             if (!f.isDirectory()) {
                 if (isValidByExclusionPath(f.getAbsolutePath())) {
@@ -61,19 +61,16 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public Collection<File> getFolderInBasePath() {
-
-        Validate.notNull(basePath, "Il BasePath e nullo o vuoto");
         Validate.notEmpty(basePath, "Il BasePath e nullo o vuoto");
 
         File folder = new File(basePath);
         Validate.isTrue(folder.exists(), "Il path fornito non esiste : " + basePath);
         Validate.isTrue(folder.isDirectory(), "Il path fornito non e una directory: " + basePath);
 
-        Collection<File> out = new ArrayList<File>();
-
         // Lista solo delle cartelle
         Collection<File> list = FileUtils.listFilesAndDirs(folder, new NotFileFilter(TrueFileFilter.INSTANCE),
                 DirectoryFileFilter.DIRECTORY);
+        Collection<File> out = new ArrayList<>(list.size());
 
         for (File f : list) {
             if (f.isDirectory() && f != folder) {
@@ -96,11 +93,10 @@ public class FileServiceImpl implements FileService {
     @Override
     public boolean isValidByExclusionPath(String path) {
 
-        if (StringUtils.isBlank(exclusionPath)) {
+        if (filter.isEmpty()) {
             return true;
         }
 
-        List<String> filter = Arrays.asList(exclusionPath.split(";"));
         for (String s : filter) {
             if (path.contains(s)) {
                 LOGGER.debug("Path excluded by rule : [{}]", path);
@@ -108,20 +104,6 @@ public class FileServiceImpl implements FileService {
             }
         }
         return true;
-    }
-
-    /**
-     * A scopo di test
-     */
-    protected void setBasePath(String basePath) {
-        this.basePath = basePath;
-    }
-
-    /**
-     * A scopo di test
-     */
-    protected void setExclusionPath(String exclusionPath) {
-        this.exclusionPath = exclusionPath;
     }
 
 }

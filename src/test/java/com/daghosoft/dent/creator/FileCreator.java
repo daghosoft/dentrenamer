@@ -16,7 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 public class FileCreator {
-    private static String BASEPATH = "";
+    private static String BASEPATH = StringUtils.EMPTY;
     private static final String WINDOWSPATH = "C://temp//zzzdentRenamer";
     private static final String MACPATH = "//uploads//FileCreator";
 
@@ -53,7 +53,7 @@ public class FileCreator {
     }
 
     @Test
-    // @Ignore
+    @Ignore
     public void generateMyMovieListFiles() throws IOException {
 
         String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");

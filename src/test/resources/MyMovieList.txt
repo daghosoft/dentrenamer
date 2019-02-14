@@ -8,8 +8,8 @@
 #recycle//Dumbo-2009.avi
 
 Cartoni
-Film
-HarryPotter
+Film/@eardir
+HarryPotter/@eardir
 listAll.txt
 SerieTv
 Super eroi
@@ -41,7 +41,7 @@ Hotel.Transylvania
 i capolavori del cinema di animazione Miyazaki
 I Croods - The Croods 2013
 
-Il libro della giungla
+exclude/Il libro della giungla
 Il Piccolo Principe - Le Petit Prince - 2015
 Il viaggio di Arlo - The Good Dinosaur 2015
 Il.Viaggio.Di.Norm.2016.ITALiAN.AC3.BRRip.XviD-TTN.avi
@@ -110,53 +110,53 @@ Minions.2015.avi
 
 Cenerentola - Cinderella (1950).ita.eng.sub.ita.eng.MIRCrew.avi
 
-cartoni/01 - Ribellione.mp4
-cartoni/02 - Terrore dal cielo.mp4
-cartoni/03 - Il ritorno di Beralios.mp4
-cartoni/04 - Vivere da principi.mp4
-cartoni/05 - Gli ostaggi.mp4
-cartoni/06 - Gamerot.mp4
-cartoni/07 - Il generale Herman.mp4
-cartoni/08 - Perfida.mp4
-cartoni/09 - Nelle fauci del mostro.mp4
-cartoni/10 - Tragico destino.mp4
-cartoni/11 - La prova del fuoco.mp4
-cartoni/12 - Sanae in pericolo.mp4
-cartoni/13 - Tanosuke si innamora.mp4
-cartoni/14 - Un'amicizia.mp4
-cartoni/15 - Una festa indimenticabile.mp4
-cartoni/16 - Il tranello.mp4
-cartoni/17 - Il suono delle campane.mp4
-cartoni/18 - Un colpo di fulmine.mp4
-cartoni/19 - Il maestro.mp4
-cartoni/20 - L'invasione delle stelle marine.mp4
-cartoni/21 - Cratus il guerriero dello spazio.mp4
-cartoni/22 - Il robot professore.mp4
-cartoni/23 - La tigre dello spazio.mp4
-cartoni/24 - L'inganno.mp4
-cartoni/25 - Il perdono di Danji.mp4
-cartoni/26 - Faccia a faccia.mp4
-cartoni/27 - Un folle rischio.mp4
-cartoni/28 - Attacco sulla Luna.mp4
-cartoni/29 - Operazione energia.mp4
-cartoni/30 - La principessa Florinda.mp4
-cartoni/31 - Un incontro importante.mp4
-cartoni/32 - La storia del principe Harlin.mp4
-cartoni/33 - Chi e' Kloppen.mp4
-cartoni/34 - Il perdono del guerriero.mp4
-cartoni/35 - Tradimento.mp4
-cartoni/36 - Trattato di pace.mp4
-cartoni/37 - La nave maledetta.mp4
-cartoni/38 - Il ritorno di Harlin.mp4
-cartoni/39 - I disertori.mp4
-cartoni/40 - Il segreto di Namel.mp4
-cartoni/41 - Kloppen in crisi .mp4
-cartoni/42 - Una trappola per Kloppen.mp4
-cartoni/43 - Impresa eroica.mp4
-cartoni/44 - Viaggio nel cosmo.mp4
-cartoni/45 - In lotta contro la morte.mp4
-cartoni/46 - Alla conquista di Zaar .mp4
-cartoni/47 - La tragedia di Ormen.mp4
+exclude/cartoni/01 - Ribellione.mp4
+exclude/cartoni/02 - Terrore dal cielo.mp4
+exclude/cartoni/03 - Il ritorno di Beralios.mp4
+exclude/cartoni/04 - Vivere da principi.mp4
+exclude/cartoni/05 - Gli ostaggi.mp4
+exclude/cartoni/06 - Gamerot.mp4
+exclude/cartoni/07 - Il generale Herman.mp4
+exclude/cartoni/08 - Perfida.mp4
+exclude/cartoni/09 - Nelle fauci del mostro.mp4
+exclude/cartoni/10 - Tragico destino.mp4
+exclude/cartoni/11 - La prova del fuoco.mp4
+exclude/cartoni/12 - Sanae in pericolo.mp4
+exclude/cartoni/13 - Tanosuke si innamora.mp4
+exclude/cartoni/14 - Un'amicizia.mp4
+exclude/cartoni/15 - Una festa indimenticabile.mp4
+exclude/cartoni/16 - Il tranello.mp4
+exclude/cartoni/17 - Il suono delle campane.mp4
+exclude/cartoni/18 - Un colpo di fulmine.mp4
+exclude/cartoni/19 - Il maestro.mp4
+exclude/cartoni/20 - L'invasione delle stelle marine.mp4
+exclude/cartoni/21 - Cratus il guerriero dello spazio.mp4
+exclude/cartoni/22 - Il robot professore.mp4
+exclude/cartoni/23 - La tigre dello spazio.mp4
+exclude/cartoni/24 - L'inganno.mp4
+exclude/cartoni/25 - Il perdono di Danji.mp4
+exclude/cartoni/26 - Faccia a faccia.mp4
+exclude/cartoni/27 - Un folle rischio.mp4
+exclude/cartoni/28 - Attacco sulla Luna.mp4
+exclude/cartoni/29 - Operazione energia.mp4
+exclude/cartoni/30 - La principessa Florinda.mp4
+exclude/cartoni/31 - Un incontro importante.mp4
+exclude/cartoni/32 - La storia del principe Harlin.mp4
+exclude/cartoni/33 - Chi e' Kloppen.mp4
+exclude/cartoni/34 - Il perdono del guerriero.mp4
+exclude/cartoni/35 - Tradimento.mp4
+exclude/cartoni/36 - Trattato di pace.mp4
+exclude/cartoni/37 - La nave maledetta.mp4
+exclude/cartoni/38 - Il ritorno di Harlin.mp4
+exclude/cartoni/39 - I disertori.mp4
+exclude/cartoni/40 - Il segreto di Namel.mp4
+exclude/cartoni/41 - Kloppen in crisi .mp4
+exclude/cartoni/42 - Una trappola per Kloppen.mp4
+exclude/cartoni/43 - Impresa eroica.mp4
+exclude/cartoni/44 - Viaggio nel cosmo.mp4
+exclude/cartoni/45 - In lotta contro la morte.mp4
+exclude/cartoni/46 - Alla conquista di Zaar .mp4
+exclude/cartoni/47 - La tragedia di Ormen.mp4
 
 Dragon.Trainer.2.2014.avi
 Dragon.Trainer.[DVDRip-Ita.Eng-MaU].avi
