@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RenamerServiceImpl implements RenamerService {
 
+    private static final String SUPERKILLERIDENTIFIER = "****";
     private static final String SPACE = " ";
     private static Set<String> wordSeparatorlist = new HashSet<>();
     private static Set<String> blackListWords = new HashSet<>();
@@ -51,6 +52,10 @@ public class RenamerServiceImpl implements RenamerService {
         if (StringUtils.isBlank(baseName)) {
             return name;
         }
+
+        baseName = superKillerWords(baseName);
+        LOGGER.debug("Rimosso il - prima dell'estenzione : [{}]", baseName);
+
         baseName = removeWordSeparator(baseName);
         LOGGER.debug("Rimossi i separatori : [{}]", baseName);
 
@@ -82,6 +87,16 @@ public class RenamerServiceImpl implements RenamerService {
         LOGGER.debug("Aggiunta estenzione : [{}]", baseName);
 
         return out.trim();
+    }
+
+    protected String superKillerWords(String baseName) {
+        for (String item : blackListWords) {
+            if (item.startsWith(SUPERKILLERIDENTIFIER)) {
+                String superkiller = item.replace(SUPERKILLERIDENTIFIER, StringUtils.EMPTY);
+                baseName = baseName.toLowerCase().replace(superkiller, StringUtils.EMPTY);
+            }
+        }
+        return baseName.trim();
     }
 
     protected String formatYear(String baseName) {

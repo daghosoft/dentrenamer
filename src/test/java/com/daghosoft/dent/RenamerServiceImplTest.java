@@ -81,8 +81,14 @@ public class RenamerServiceImplTest {
     @Test
     public void killerHyphenContainingWord() {
         String out = sut.killerHyphenContainingWord("wall-e blueRay-XviD XviD-xmen ");
-        System.out.println(out);
         assertThat(out).isEqualTo("wall-e XviD-xmen");
+    }
+
+    // ------------------------------------------- superKillerWords
+    @Test
+    public void superKillerWords() {
+        String out = sut.superKillerWords("wall-e P O W");
+        assertThat(out).isEqualTo("wall-e");
     }
 
 }
