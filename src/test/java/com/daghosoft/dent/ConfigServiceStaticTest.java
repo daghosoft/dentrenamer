@@ -28,13 +28,6 @@ public class ConfigServiceStaticTest {
     }
 
     @Test
-    public void getBlackListTest() {
-        String out = sut.getBlackList();
-        assertThat(out).isNotNull();
-        assertThat(out).isEqualTo("iTALiAN;BDRip;XviD;TRL;MT;dvdRip;sub;ita;MIRCrew");
-    }
-
-    @Test
     public void getBasePathTest() {
         String out = sut.getBasePath();
         assertThat(out).isNotNull();

@@ -54,7 +54,7 @@ public class FileCreator {
 
     @Test
     @Ignore
-    public void generateMyMovieListFiles() throws IOException {
+    public void populateFileFolder() throws IOException {
 
         String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");
         for (int x = 0; x < lines.length; x++) {

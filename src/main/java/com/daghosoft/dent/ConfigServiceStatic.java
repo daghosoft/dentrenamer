@@ -23,7 +23,6 @@ public class ConfigServiceStatic {
 
     private static final String CONFIGNAME = "/config.properties";
     private static final String WORDSEPARATOR = "word.separator";
-    private static final String BLACKLIST = "word.blacklist";
     private static final String YEARLIMIT = "word.year.limit";
     private static final String BASEPATH = "file.basePath";
     private static final String EXCLUSIONPATH = "file.exclusion.path";
@@ -78,12 +77,6 @@ public class ConfigServiceStatic {
         return properties;
     }
 
-    public String getBlackList() {
-        Validate.notNull(properties,
-                "l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
-        return ((String) properties.get(BLACKLIST)).trim();
-    }
-
     public String getWordSeparator() {
         Validate.notNull(properties,
                 "l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
@@ -103,6 +96,7 @@ public class ConfigServiceStatic {
     }
 
     private Set<String> extensionDelete;
+    private Set<String> concatWords;
 
     public Set<String> getExtensionDelete() {
         Validate.notNull(properties,
@@ -144,20 +138,30 @@ public class ConfigServiceStatic {
 
     public Set<String> getConcatWords() {
         Validate.notNull(execPath);
+        if (concatWords != null) {
+            return concatWords;
+        }
 
         File words = new File(execPath + File.separatorChar + "concatWords.properties");
 
-        LOGGER.debug("################### search for : {}", words.getAbsolutePath());
-        Set<String> out = new HashSet<>();
+        LOGGER.debug("################### search for : {} {}", words.getAbsolutePath(), words.exists());
         if (words.exists()) {
             try {
-                out.addAll(FileUtils.readLines(words, "UTF-8"));
-            } catch (IOException e) {
-                e.printStackTrace();
+                List<String> listWords = FileUtils.readLines(words, "UTF-8");
+                concatWords = new HashSet<>(listWords.size());
+                for (String s : listWords) {
+                    if (StringUtils.isBlank(s)) {
+                        continue;
+                    }
+                    concatWords.add(s.toLowerCase().trim());
+                }
+            } catch (Exception e) {
+                LOGGER.error("Impossibile leggere il file : [{}]", words.getAbsolutePath(), e);
+                concatWords = new HashSet<>();
             }
         }
 
-        return out;
+        return concatWords;
     }
 
 }

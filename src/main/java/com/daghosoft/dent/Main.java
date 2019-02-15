@@ -20,6 +20,9 @@ public class Main {
     private static final String EXEC = "exec";
     private static boolean execute = false;
 
+    private static final String RENAMEPROCESS = "rename";
+    private static boolean renameProcess = false;
+
     private static final String MOVEBASE = "moveBasePath";
     private static boolean moveBasePath = false;
 
@@ -49,14 +52,17 @@ public class Main {
 
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            String msg = String.format("Impossibile eseguire Dent. Parametri Disponibili: [%s] [%s] [%s] [%s] [%s]",
-                    EXEC, MOVEBASE, DELETEEMPTY, DELETEEXT, DEBUG);
+            String msg = String.format("Impossibile eseguire Dent. Parametri Disponibili: [%s] [%s] [%s] [%s] [%s] [%s]",
+                    RENAMEPROCESS, EXEC, MOVEBASE, DELETEEMPTY, DELETEEXT, DEBUG);
             System.out.println(msg);
             return;
         }
         for (String param : args) {
             if (param.equals(EXEC)) {
                 execute = true;
+            }
+            if (param.equals(RENAMEPROCESS)) {
+                renameProcess = true;
             }
             if (param.equals(MOVEBASE)) {
                 moveBasePath = true;
@@ -193,14 +199,17 @@ public class Main {
     }
 
     private static void renameProces(Collection<File> itemList, TYPE type) {
+        if (!renameProcess) {
+            return;
+        }
         for (File f : itemList) {
             String containingPath = FilenameUtils.getFullPath(f.getAbsolutePath());
             String name = f.getName();
             String targetName = renamerService.rename(name, type == TYPE.FILE);
-            reportService.writeRename(name, targetName, type);
             if (name.equals(targetName)) {
                 continue;
             }
+            reportService.writeRename(name, targetName, type);
             try {
                 File targetFile = new File(containingPath + separator + targetName);
                 if (!targetFile.exists()) {
