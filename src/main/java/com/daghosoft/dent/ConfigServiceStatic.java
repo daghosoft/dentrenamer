@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -21,147 +22,189 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigServiceStatic {
 
-    private static final String CONFIGNAME = "/config.properties";
-    private static final String WORDSEPARATOR = "word.separator";
-    private static final String YEARLIMIT = "word.year.limit";
-    private static final String BASEPATH = "file.basePath";
-    private static final String EXCLUSIONPATH = "file.exclusion.path";
-    private static final String EXTENSIONDELETE = "file.extension.delete";
-    private static String execPath;
+	private static final String CONFIGNAME = "/config.properties";
+	private static final String WORDSEPARATOR = "word.separator";
+	private static final String YEARLIMIT = "word.year.limit";
+	private static final String BASEPATH = "file.basePath";
+	private static final String EXCLUSIONPATH = "file.exclusion.path";
+	private static final String EXTENSIONDELETE = "file.extension.delete";
 
-    private static Properties properties;
-    private static ConfigServiceStatic config;
+	protected static final String RENAME = "file.rename";
+	protected static final String MOVE = "file.move.basepath";
+	protected static final String DELETEEXT = "file.delete.by.extension";
+	protected static final String DELTEEMPTY = "folder.delete.empty";
+	protected static final String FOLDERDEBUG = "folder.debug";
+	protected static final String EXEC = "exec";
 
-    private ConfigServiceStatic(String pConfigName) {
+	// path di esecuzione sulla base del config name
+	private static String execPath;
 
-        if (!pConfigName.startsWith("/")) {
-            pConfigName = "/" + pConfigName;
-        }
-        URL config = this.getClass().getResource(pConfigName);
+	private static Properties properties;
+	private static ConfigServiceStatic config;
 
-        Validate.notNull(config, "Errore recupero file di configurazione config.properties");
-        LOGGER.debug("Load config from : [{}]", config.getPath());
-        try {
-            File fconfig = new File(config.getPath());
-            execPath = FilenameUtils.getFullPathNoEndSeparator(fconfig.getAbsolutePath());
-            LOGGER.debug("execPath ######################## [{}]", execPath);
-            FileInputStream fis = new FileInputStream(fconfig);
-            properties = new Properties();
-            properties.load(fis);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+	private ConfigServiceStatic(String pConfigName) {
 
-    protected static ConfigServiceStatic getConfig(String pPath) {
-        if (config != null) {
-            return config;
-        }
+		if (!pConfigName.startsWith("/")) {
+			pConfigName = "/" + pConfigName;
+		}
+		URL config = this.getClass().getResource(pConfigName);
 
-        config = new ConfigServiceStatic(pPath);
-        return config;
-    }
+		Validate.notNull(config, "Errore recupero file di configurazione config.properties");
+		LOGGER.debug("Load config from : [{}]", config.getPath());
+		try {
+			File fconfig = new File(config.getPath());
+			execPath = FilenameUtils.getFullPathNoEndSeparator(fconfig.getAbsolutePath());
+			LOGGER.debug("execPath ######################## [{}]", execPath);
+			FileInputStream fis = new FileInputStream(fconfig);
+			properties = new Properties();
+			properties.load(fis);
+			fis.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-    public static ConfigServiceStatic getConfig() {
-        if (config != null) {
-            return config;
-        }
+	protected static ConfigServiceStatic getConfig(String pPath) {
+		if (config != null) {
+			return config;
+		}
 
-        config = new ConfigServiceStatic(CONFIGNAME);
-        return config;
-    }
+		config = new ConfigServiceStatic(pPath);
+		return config;
+	}
 
-    public Properties getPropertySet() {
-        return properties;
-    }
+	public static ConfigServiceStatic getConfig() {
+		if (config != null) {
+			return config;
+		}
 
-    public String getWordSeparator() {
-        Validate.notNull(properties,
-                "l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
-        return ((String) properties.get(WORDSEPARATOR)).trim();
-    }
+		config = new ConfigServiceStatic(CONFIGNAME);
+		return config;
+	}
 
-    public String getBasePath() {
-        Validate.notNull(properties,
-                "l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
-        return ((String) properties.get(BASEPATH)).trim();
-    }
+	public String getWordSeparator() {
+		return ((String) properties.get(WORDSEPARATOR)).trim();
+	}
 
-    public String getExclusionPath() {
-        Validate.notNull(properties,
-                "l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
-        return ((String) properties.get(EXCLUSIONPATH)).trim();
-    }
+	public Set<File> getBasePath() {
+		Validate.isTrue(properties.containsKey(BASEPATH),
+				"Il file di configurazione deve contenre almeno un basepath : " + BASEPATH);
 
-    private Set<String> extensionDelete;
-    private Set<String> concatWords;
+		Set<File> out = new HashSet<>();
+		verifyFile(BASEPATH, out);
+		for (int x = 10; x > 0; x--) {
+			verifyFile(BASEPATH + "." + x, out);
+		}
+		return out;
+	}
 
-    public Set<String> getExtensionDelete() {
-        Validate.notNull(properties,
-                "l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
+	private void verifyFile(String path, Set<File> out) {
+		// TODO da rimuovere
+		LOGGER.info("### [{}]", path);
+		if (!properties.containsKey(path)) {
+			return;
+		}
+		String pathString = properties.getProperty(path);
+		// TODO da rimuovere
+		LOGGER.info("### [{}]", pathString);
+		File folder = new File(pathString);
+		if (folder.exists()) {
+			out.add(folder);
+		}
+	}
 
-        if (extensionDelete != null) {
-            return extensionDelete;
-        }
+	public String getExclusionPath() {
+		return ((String) properties.get(EXCLUSIONPATH)).trim();
+	}
 
-        if (properties.get(EXTENSIONDELETE) == null) {
-            return new HashSet<String>();
-        }
-        String tmp = ((String) properties.get(EXTENSIONDELETE)).trim();
-        if (StringUtils.isBlank(tmp) || !tmp.contains(";")) {
-            return new HashSet<String>();
-        }
+	private Set<String> extensionDelete;
+	private Set<String> concatWords;
 
-        List<String> list = Arrays.asList(tmp.toLowerCase().split(";"));
-        extensionDelete = new HashSet<>();
-        extensionDelete.addAll(list);
-        return extensionDelete;
-    }
+	public Set<String> getExtensionDelete() {
+		if (extensionDelete != null) {
+			return extensionDelete;
+		}
 
-    public String getYearLimit() {
-        Validate.notNull(properties,
-                "l'oggetto properties risulta nullo possibile causa errore nel recupero del file di properties");
+		if (properties.get(EXTENSIONDELETE) == null) {
+			return new HashSet<String>();
+		}
+		String tmp = ((String) properties.get(EXTENSIONDELETE)).trim();
+		if (StringUtils.isBlank(tmp) || !tmp.contains(";")) {
+			return new HashSet<String>();
+		}
 
-        if (properties.containsKey(YEARLIMIT)) {
-            return ((String) properties.get(YEARLIMIT)).trim();
-        }
+		List<String> list = Arrays.asList(tmp.toLowerCase().split(";"));
+		extensionDelete = new HashSet<>();
+		extensionDelete.addAll(list);
+		return extensionDelete;
+	}
 
-        return StringUtils.EMPTY;
-    }
+	public String getYearLimit() {
+		if (properties.containsKey(YEARLIMIT)) {
+			return ((String) properties.get(YEARLIMIT)).trim();
+		}
 
-    public File getReportFile() {
-        Validate.notNull(execPath);
-        return new File(execPath + File.separatorChar + "dent-renamer-report.csv");
-    }
+		return StringUtils.EMPTY;
+	}
 
-    public Set<String> getConcatWords() {
-        Validate.notNull(execPath);
-        if (concatWords != null) {
-            return concatWords;
-        }
+	public File getReportFile() {
+		Validate.notNull(execPath);
+		return new File(execPath + File.separatorChar + "dent-renamer-report.csv");
+	}
 
-        File words = new File(execPath + File.separatorChar + "concatWords.properties");
+	public Set<String> getConcatWords() {
+		Validate.notNull(execPath);
+		if (concatWords != null) {
+			return concatWords;
+		}
 
-        LOGGER.debug("################### search for : {} {}", words.getAbsolutePath(), words.exists());
-        if (words.exists()) {
-            try {
-                List<String> listWords = FileUtils.readLines(words, "UTF-8");
-                concatWords = new HashSet<>(listWords.size());
-                for (String s : listWords) {
-                    if (StringUtils.isBlank(s)) {
-                        continue;
-                    }
-                    concatWords.add(s.toLowerCase().trim());
-                }
-            } catch (Exception e) {
-                LOGGER.error("Impossibile leggere il file : [{}]", words.getAbsolutePath(), e);
-                concatWords = new HashSet<>();
-            }
-        }
+		File words = new File(execPath + File.separatorChar + "concatWords.properties");
+		LOGGER.debug("################### search for : {} {}", words.getAbsolutePath(), words.exists());
+		if (words.exists()) {
+			try {
+				List<String> listWords = FileUtils.readLines(words, "UTF-8");
+				concatWords = listWords.stream().filter(s -> StringUtils.isNotBlank(s)).map(s -> s.toLowerCase().trim())
+						.collect(Collectors.toSet());
+			} catch (Exception e) {
+				LOGGER.error("Impossibile leggere il file : [{}]", words.getAbsolutePath(), e);
+				concatWords = new HashSet<>();
+			}
+		}
 
-        return concatWords;
-    }
+		return concatWords;
+	}
+
+	public boolean getRENAME() {
+		return asBoolean(RENAME);
+	};
+
+	public boolean getMOVE() {
+		return asBoolean(MOVE);
+	};
+
+	public boolean getDELETEEXT() {
+		return asBoolean(DELETEEXT);
+	};
+
+	public boolean getDELTEEMPTY() {
+		return asBoolean(DELTEEMPTY);
+	};
+
+	public boolean getFOLDERDEBUG() {
+		return asBoolean(FOLDERDEBUG);
+	};
+
+	public boolean getEXEC() {
+		return asBoolean(EXEC);
+	};
+
+	private boolean asBoolean(String param) {
+		if (properties.getProperty(param) == null) {
+			return false;
+		}
+		return "true".equals(properties.getProperty(param).trim()) ? true : false;
+	}
 
 }
