@@ -13,197 +13,190 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RenamerServiceImpl implements RenamerService {
 
-    private static final String SUPERKILLERIDENTIFIER = "****";
-    private static final String SPACE = " ";
-    private static Set<String> wordSeparatorlist = new HashSet<>();
-    private static Set<String> blackListWords = new HashSet<>();
-    private int yearLimit = 1900;
+	private static final String SUPERKILLERIDENTIFIER = "****";
+	private static final String SPACE = " ";
+	private static Set<String> wordSeparatorlist = new HashSet<>();
+	private static Set<String> blackListWords = new HashSet<>();
+	private int yearLimit = 1900;
 
-    protected ConfigServiceStatic config;
+	// Costruttore di test
+	protected RenamerServiceImpl(ConfigServiceStatic pConfig) {
+		String[] ws = pConfig.getWordSeparator().split(";");
+		wordSeparatorlist.addAll(Arrays.asList(ws));
+		yearLimit = pConfig.getYearLimit();
+		blackListWords.clear();
+		blackListWords.addAll(pConfig.getConcatWords());
+	}
 
-    // Costruttore di test
-    public RenamerServiceImpl(ConfigServiceStatic pConfig) {
-        config = pConfig;
+	public RenamerServiceImpl() {
+		this(ConfigServiceStatic.getConfig());
+	}
 
-        String[] ws = config.getWordSeparator().split(";");
-        wordSeparatorlist.addAll(Arrays.asList(ws));
+	@Override
+	public String rename(final String name, Boolean isFile) {
+		String baseName = name.toLowerCase();
+		String ext = StringUtils.EMPTY;
 
-        try {
-            yearLimit = Integer.valueOf(config.getYearLimit());
-        } catch (Exception e) {
-        }
-        blackListWords = config.getConcatWords();
-    }
+		if (isFile) {
+			baseName = FilenameUtils.getBaseName(name).toLowerCase();
+			ext = "." + FilenameUtils.getExtension(name).toLowerCase();
+		}
+		LOGGER.debug("!!!!!!!!!!!!!!!!!!!!!!! filename : [{}] + ext : [{}]", baseName, ext);
+		if (StringUtils.isBlank(baseName)) {
+			return name;
+		}
 
-    public RenamerServiceImpl() {
-        this(ConfigServiceStatic.getConfig());
-    }
+		baseName = superKillerWords(baseName);
+		LOGGER.debug("Rimosso il - prima dell'estenzione : [{}]", baseName);
 
-    @Override
-    public String rename(final String name, Boolean isFile) {
-        String baseName = name.toLowerCase();
-        String ext = StringUtils.EMPTY;
+		baseName = removeWordSeparator(baseName);
+		LOGGER.debug("Rimossi i separatori : [{}]", baseName);
 
-        if (isFile) {
-            baseName = FilenameUtils.getBaseName(name).toLowerCase();
-            ext = "." + FilenameUtils.getExtension(name).toLowerCase();
-        }
-        LOGGER.debug("!!!!!!!!!!!!!!!!!!!!!!! filename : [{}] + ext : [{}]", baseName, ext);
-        if (StringUtils.isBlank(baseName)) {
-            return name;
-        }
+		baseName = blackListFilter(baseName);
+		LOGGER.debug("Rimosse le parole in blackList : [{}]", baseName);
 
-        baseName = superKillerWords(baseName);
-        LOGGER.debug("Rimosso il - prima dell'estenzione : [{}]", baseName);
+		baseName = formatYear(baseName);
+		LOGGER.debug("Gestita la formattazione dell'anno : [{}]", baseName);
 
-        baseName = removeWordSeparator(baseName);
-        LOGGER.debug("Rimossi i separatori : [{}]", baseName);
+		baseName = WordUtils.capitalizeFully(baseName);
+		LOGGER.debug("Capitalize : [{}]", baseName);
 
-        baseName = blackListFilter(baseName);
-        LOGGER.debug("Rimosse le parole in blackList : [{}]", baseName);
+		baseName = StringUtils.normalizeSpace(baseName);
+		LOGGER.debug("Tolti spazi doppi : [{}]", baseName);
 
-        baseName = formatYear(baseName);
-        LOGGER.debug("Gestita la formattazione dell'anno : [{}]", baseName);
+		baseName = removeMultipleHyphen(baseName);
+		LOGGER.debug("Tolti doppi trattini : [{}]", baseName);
 
-        baseName = WordUtils.capitalizeFully(baseName);
-        LOGGER.debug("Capitalize : [{}]", baseName);
+		baseName = normalizeYearSeparator(baseName);
+		LOGGER.debug("Rimosso il - prima dell'estenzione : [{}]", baseName);
 
-        baseName = StringUtils.normalizeSpace(baseName);
-        LOGGER.debug("Tolti spazi doppi : [{}]", baseName);
+		baseName = killerHyphenContainingWord(baseName);
+		LOGGER.debug("Verfica delle parole che contengono il [-]: [{}]", baseName);
 
-        baseName = removeMultipleHyphen(baseName);
-        LOGGER.debug("Tolti doppi trattini : [{}]", baseName);
+		baseName = normalizeYearSeparator(baseName);
+		LOGGER.debug("Rimosso il - prima dell'estenzione : [{}]", baseName);
 
-        baseName = normalizeYearSeparator(baseName);
-        LOGGER.debug("Rimosso il - prima dell'estenzione : [{}]", baseName);
+		String out = baseName + ext;
+		LOGGER.debug("Aggiunta estenzione : [{}]", baseName);
 
-        baseName = killerHyphenContainingWord(baseName);
-        LOGGER.debug("Verfica delle parole che contengono il [-]: [{}]", baseName);
+		return out.trim();
+	}
 
-        baseName = normalizeYearSeparator(baseName);
-        LOGGER.debug("Rimosso il - prima dell'estenzione : [{}]", baseName);
+	protected String superKillerWords(String baseName) {
+		for (String item : blackListWords) {
+			if (item.startsWith(SUPERKILLERIDENTIFIER)) {
+				String superkiller = item.replace(SUPERKILLERIDENTIFIER, StringUtils.EMPTY);
+				baseName = baseName.toLowerCase().replace(superkiller, StringUtils.EMPTY);
+			}
+		}
+		return baseName.trim();
+	}
 
-        String out = baseName + ext;
-        LOGGER.debug("Aggiunta estenzione : [{}]", baseName);
+	protected String formatYear(String baseName) {
+		String[] arr = splitOnSpace(baseName);
+		StringBuilder out = new StringBuilder();
+		for (String s : arr) {
+			try {
+				Integer year = Integer.valueOf(s);
+				if (year >= yearLimit) {
+					out.append(SPACE).append(String.format("(%s) -", s));
+				} else {
+					out.append(SPACE).append(s);
+				}
 
-        return out.trim();
-    }
+			} catch (NumberFormatException e) {
+				out.append(SPACE).append(s);
+			}
+		}
+		return out.toString().trim();
+	}
 
-    protected String superKillerWords(String baseName) {
-        for (String item : blackListWords) {
-            if (item.startsWith(SUPERKILLERIDENTIFIER)) {
-                String superkiller = item.replace(SUPERKILLERIDENTIFIER, StringUtils.EMPTY);
-                baseName = baseName.toLowerCase().replace(superkiller, StringUtils.EMPTY);
-            }
-        }
-        return baseName.trim();
-    }
+	protected String normalizeYearSeparator(String w) {
+		String out = w.trim();
+		if (out.endsWith("-")) {
+			out = out.substring(0, out.lastIndexOf("-")).trim();
+		}
+		if (out.startsWith("-")) {
+			out = out.substring(1, out.length());
+		}
 
-    protected String formatYear(String baseName) {
-        String[] arr = splitOnSpace(baseName);
-        StringBuilder out = new StringBuilder();
-        for (String s : arr) {
-            try {
-                Integer year = Integer.valueOf(s);
-                if (year >= yearLimit) {
-                    out.append(SPACE).append(String.format("(%s) -", s));
-                } else {
-                    out.append(SPACE).append(s);
-                }
+		return out.trim();
+	}
 
-            } catch (NumberFormatException e) {
-                out.append(SPACE).append(s);
-            }
-        }
-        return out.toString().trim();
-    }
+	protected String removeMultipleHyphen(String w) {
+		String out = w.trim();
+		out = StringUtils.normalizeSpace(out).replace("- -", "-");
+		if (out.contains("- -")) {
+			out = removeMultipleHyphen(out);
+		}
 
-    protected String normalizeYearSeparator(String w) {
-        String out = w.trim();
-        if (out.endsWith("-")) {
-            out = out.substring(0, out.lastIndexOf("-")).trim();
-        }
-        if (out.startsWith("-")) {
-            out = out.substring(1, out.length());
-        }
+		return out.trim();
+	}
 
-        return out.trim();
-    }
+	protected String removeWordSeparator(String fileName) {
+		String out = fileName;
+		for (String s : wordSeparatorlist) {
+			out = out.replace(s, SPACE);
+		}
+		return out.trim();
+	}
 
-    protected String removeMultipleHyphen(String w) {
-        String out = w.trim();
-        out = StringUtils.normalizeSpace(out).replace("- -", "-");
-        if (out.contains("- -")) {
-            out = removeMultipleHyphen(out);
-        }
+	protected String blackListFilter(String fileName) {
+		StringBuilder out = new StringBuilder();
+		String[] filenameArr = splitOnSpace(fileName);
 
-        return out.trim();
-    }
+		for (String s : filenameArr) {
+			if (blackListWords.contains(s.toLowerCase())) {
+				continue;
+			}
+			out.append(SPACE).append(s);
+		}
 
-    protected String removeWordSeparator(String fileName) {
-        String out = fileName;
-        for (String s : wordSeparatorlist) {
-            out = out.replace(s, SPACE);
-        }
-        return out.trim();
-    }
+		return out.toString().trim();
+	}
 
-    protected String blackListFilter(String fileName) {
-        StringBuilder out = new StringBuilder();
-        String[] filenameArr = splitOnSpace(fileName);
+	/**
+	 * Verifica la presenza di parole che contengono il [-] se presenti vengono
+	 * spezzate e processate come singole parole, in quel caso se tutte le parti
+	 * della parola originaria sono in black list allora la parola viene eliminata.
+	 * es :
+	 * 
+	 * wall-e -> niente da fare | dvdrip-novarip -> va cancellata se nella black
+	 * list è presente sia dvdrip che novarip | dvdrip-xmen -> niente da fare
+	 * 
+	 * @param fileName
+	 * @return
+	 */
+	protected String killerHyphenContainingWord(String fileName) {
+		StringBuilder out = new StringBuilder();
+		String[] filenameArr = StringUtils.normalizeSpace(fileName).split(SPACE);
 
-        for (String s : filenameArr) {
-            if (blackListWords.contains(s.toLowerCase())) {
-                continue;
-            }
-            out.append(SPACE).append(s);
-        }
+		// Loop sulle parole
+		for (String s : filenameArr) {
+			// verifico se la parola contiene [-] ma allo stesso tempo deve
+			// essere diversa dal solo [-]
+			if (s.contains("-") && !s.equals("-")) {
+				// booleano di verifica di default è false così che se tutte le
+				// parole a seguire non sono contenute nella black list diventa
+				// vero
+				boolean valid = false;
+				// Split in parti e verifica delle singole componenti
+				for (String word : s.split("-")) {
+					valid = blackListWords.contains(word.toLowerCase()) ? false : true;
+				}
+				// se valida entra nella stringa finale senno viene buttata
+				if (valid)
+					out.append(SPACE).append(s);
+			} else {
+				// non contiene[-] quindi la salvo così com'è
+				out.append(SPACE).append(s);
+			}
+		}
 
-        return out.toString().trim();
-    }
+		return out.toString().trim();
+	}
 
-    /**
-     * Verifica la presenza di parole che contengono il [-] se presenti vengono
-     * spezzate e processate come singole parole, in quel caso se tutte le parti
-     * della parola originaria sono in black list allora la parola viene
-     * eliminata. es :
-     * 
-     * wall-e -> niente da fare | dvdrip-novarip -> va cancellata se nella black
-     * list è presente sia dvdrip che novarip | dvdrip-xmen -> niente da fare
-     * 
-     * @param fileName
-     * @return
-     */
-    protected String killerHyphenContainingWord(String fileName) {
-        StringBuilder out = new StringBuilder();
-        String[] filenameArr = StringUtils.normalizeSpace(fileName).split(SPACE);
-
-        // Loop sulle parole
-        for (String s : filenameArr) {
-            // verifico se la parola contiene [-] ma allo stesso tempo deve
-            // essere diversa dal solo [-]
-            if (s.contains("-") && !s.equals("-")) {
-                // booleano di verifica di default è false così che se tutte le
-                // parole a seguire non sono contenute nella black list diventa
-                // vero
-                boolean valid = false;
-                // Split in parti e verifica delle singole componenti
-                for (String word : s.split("-")) {
-                    valid = blackListWords.contains(word.toLowerCase()) ? false : true;
-                }
-                // se valida entra nella stringa finale senno viene buttata
-                if (valid)
-                    out.append(SPACE).append(s);
-            } else {
-                // non contiene[-] quindi la salvo così com'è
-                out.append(SPACE).append(s);
-            }
-        }
-
-        return out.toString().trim();
-    }
-
-    private String[] splitOnSpace(String fileName) {
-        return fileName.trim().split(SPACE);
-    }
+	private String[] splitOnSpace(String fileName) {
+		return fileName.trim().split(SPACE);
+	}
 }

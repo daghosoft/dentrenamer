@@ -33,9 +33,9 @@ public class ConfigServiceStaticTest {
 
 	@Test
 	public void getYearLimitTest() {
-		String out = sut.getYearLimit();
+		int out = sut.getYearLimit();
 		assertThat(out).isNotNull();
-		assertThat(out).isEqualTo("1900");
+		assertThat(out).isEqualTo(1900);
 
 	}
 

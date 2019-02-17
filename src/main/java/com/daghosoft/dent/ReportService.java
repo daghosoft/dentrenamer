@@ -35,7 +35,8 @@ public class ReportService {
 		Validate.notNull(report, "Il File di report risulta nullo impossibile procedere");
 
 		if (report.exists()) {
-			report.delete();
+			boolean success = report.delete();
+			LOGGER.trace("DElete of {} success [{}]", report.getName(), success);
 		}
 
 		return reportService;

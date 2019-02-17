@@ -1,13 +1,17 @@
 package com.daghosoft.dent;
 
 import java.io.File;
-import java.util.Collection;
+import java.util.Set;
 
 public interface FileService {
 
-    Collection<File> getFilesInBasePath();
+	Set<File> getFilesInBasePath();
 
-    Collection<File> getFolderInBasePath();
+	Set<File> getFoldersInBasePath();
 
-    boolean isValidByExclusionPath(String path);
+	boolean isValidByExclusionPath(String path);
+
+	Set<File> getFiles(File basePathFolder);
+
+	Set<File> getFolders(File basePathFolder);
 }

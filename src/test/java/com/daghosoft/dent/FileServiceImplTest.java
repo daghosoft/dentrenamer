@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
@@ -19,7 +21,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest({ ConfigServiceStatic.class })
 public class FileServiceImplTest {
 
-	private static final String FakeBasePath = "./src/";
+	private static final String FakeBasePath = "./src/main/";
+	private static final String FakeBasePath1 = "./src/test/";
 
 	private static final String filter1 = "properties";
 	private static final String filter2 = "daghosoft";
@@ -32,10 +35,13 @@ public class FileServiceImplTest {
 
 	@Before
 	public void init() {
+		Set<File> out = new HashSet<>();
+		out.add(new File(FakeBasePath));
+		out.add(new File(FakeBasePath1));
 		PowerMockito.mockStatic(ConfigServiceStatic.class);
 		BDDMockito.given(ConfigServiceStatic.getConfig()).willReturn(config);
 
-		BDDMockito.given(config.getBasePath()).willReturn(FakeBasePath);
+		BDDMockito.given(config.getBasePath()).willReturn(out);
 		BDDMockito.given(config.getExclusionPath()).willReturn(FakeFilter);
 		sut = new FileServiceImpl();
 	}
@@ -43,11 +49,19 @@ public class FileServiceImplTest {
 	@Test
 	public void getFilesInBasePathTest() throws Exception {
 		File basePath = new File(FakeBasePath);
+		File basePath1 = new File(FakeBasePath1);
 		Collection<File> files = sut.getFilesInBasePath();
 		assertThat(files.size()).isGreaterThan(0);
 		for (File f : files) {
+
 			assertThat(f.isDirectory()).isFalse();
-			assertThat(f.getAbsolutePath()).contains(basePath.getAbsolutePath());
+			boolean out = false;
+			if (f.getAbsolutePath().contains(basePath.getAbsolutePath())
+					|| f.getAbsolutePath().contains(basePath1.getAbsolutePath())) {
+				out = true;
+
+			}
+			assertThat(out).isTrue();
 			assertThat(f.getAbsolutePath()).doesNotContain(filter1);
 			assertThat(f.getAbsolutePath()).doesNotContain(filter2);
 		}
@@ -56,12 +70,19 @@ public class FileServiceImplTest {
 	@Test
 	public void getFolderInBasePathTest() throws Exception {
 		File basePath = new File(FakeBasePath);
-		Collection<File> folders = sut.getFolderInBasePath();
-		assertThat(folders.size()).isGreaterThan(0);
+		File basePath1 = new File(FakeBasePath1);
+		Collection<File> files = sut.getFoldersInBasePath();
+		assertThat(files.size()).isGreaterThan(0);
+		for (File f : files) {
 
-		for (File f : folders) {
 			assertThat(f.isDirectory()).isTrue();
-			assertThat(f.getAbsolutePath()).contains(basePath.getAbsolutePath());
+			boolean out = false;
+			if (f.getAbsolutePath().contains(basePath.getAbsolutePath())
+					|| f.getAbsolutePath().contains(basePath1.getAbsolutePath())) {
+				out = true;
+
+			}
+			assertThat(out).isTrue();
 			assertThat(f.getAbsolutePath()).doesNotContain(filter1);
 			assertThat(f.getAbsolutePath()).doesNotContain(filter2);
 		}
@@ -71,11 +92,10 @@ public class FileServiceImplTest {
 	public void getFolderInBasePathTestEmptyFilter() throws Exception {
 		BDDMockito.given(config.getExclusionPath()).willReturn(StringUtils.EMPTY);
 
-		Collection<File> folders = sut.getFolderInBasePath();
+		Collection<File> folders = sut.getFoldersInBasePath();
 		assertThat(folders.size()).isGreaterThan(0);
 
 		for (File f : folders) {
-			System.out.println(f.getAbsolutePath());
 			assertThat(f.isDirectory()).isTrue();
 		}
 	}

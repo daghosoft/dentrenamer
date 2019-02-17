@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -12,19 +14,18 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class FileServiceImpl implements FileService {
 
-	private String basePath;
+	private Set<File> basePathSet;
 	private List<String> filter = new ArrayList<>();
 
 	protected FileServiceImpl() {
 		ConfigServiceStatic config = ConfigServiceStatic.getConfig();
-		basePath = config.getBasePath();
+		basePathSet = config.getBasePath();
 		String exclusionPath = config.getExclusionPath();
 		if (StringUtils.isNotBlank(exclusionPath)) {
 			filter = Arrays.asList(exclusionPath.split(";"));
@@ -33,36 +34,36 @@ public class FileServiceImpl implements FileService {
 	}
 
 	@Override
-	public Collection<File> getFilesInBasePath() {
-		Validate.notEmpty(basePath, "Il BasePath e nullo o vuoto");
+	public Set<File> getFiles(File basePathFolder) {
+		Collection<File> list = FileUtils.listFiles(basePathFolder, TrueFileFilter.TRUE, DirectoryFileFilter.INSTANCE);
+		return list.stream().filter(f -> !f.isDirectory()).filter(f -> isValidByExclusionPath(f.getAbsolutePath()))
+				.collect(Collectors.toSet());
+	}
 
-		File folder = new File(basePath);
-		Validate.isTrue(folder.exists(), "Il path fornito non esiste : " + basePath);
-		Validate.isTrue(folder.isDirectory(), "Il path fornito non e una directory: " + basePath);
-
-		// Lista solo dei file compresi nel basepath
-		Collection<File> list = FileUtils.listFiles(folder, TrueFileFilter.TRUE, DirectoryFileFilter.INSTANCE);
-
-		List<File> out = list.stream().filter(f -> !f.isDirectory())
-				.filter(f -> isValidByExclusionPath(f.getAbsolutePath())).collect(Collectors.toList());
+	@Override
+	public Set<File> getFilesInBasePath() {
+		Set<File> out = new HashSet<>();
+		for (File folder : basePathSet) {
+			out.addAll(getFiles(folder));
+		}
 
 		return out;
 	}
 
 	@Override
-	public Collection<File> getFolderInBasePath() {
-		Validate.notEmpty(basePath, "Il BasePath e nullo o vuoto");
-
-		File folder = new File(basePath);
-		Validate.isTrue(folder.exists(), "Il path fornito non esiste : " + basePath);
-		Validate.isTrue(folder.isDirectory(), "Il path fornito non e una directory: " + basePath);
-
-		// Lista solo delle cartelle
-		Collection<File> list = FileUtils.listFilesAndDirs(folder, new NotFileFilter(TrueFileFilter.INSTANCE),
+	public Set<File> getFolders(File basePathFolder) {
+		Collection<File> list = FileUtils.listFilesAndDirs(basePathFolder, new NotFileFilter(TrueFileFilter.INSTANCE),
 				DirectoryFileFilter.DIRECTORY);
+		return list.stream().filter(f -> f.isDirectory() && f != basePathFolder)
+				.filter(f -> isValidByExclusionPath(f.getAbsolutePath())).collect(Collectors.toSet());
+	}
 
-		List<File> out = list.stream().filter(f -> f.isDirectory() && f != folder)
-				.filter(f -> isValidByExclusionPath(f.getAbsolutePath())).collect(Collectors.toList());
+	@Override
+	public Set<File> getFoldersInBasePath() {
+		Set<File> out = new HashSet<>();
+		for (File folder : basePathSet) {
+			out.addAll(getFolders(folder));
+		}
 
 		return out;
 	}

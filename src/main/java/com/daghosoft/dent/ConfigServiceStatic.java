@@ -17,12 +17,13 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ConfigServiceStatic {
 
-	private static final String CONFIGNAME = "/config.properties";
+	public static final String CONFIGNAME = "/config.properties";
 	private static final String WORDSEPARATOR = "word.separator";
 	private static final String YEARLIMIT = "word.year.limit";
 	private static final String BASEPATH = "file.basePath";
@@ -42,6 +43,14 @@ public class ConfigServiceStatic {
 	private static Properties properties;
 	private static ConfigServiceStatic config;
 
+	private int yearDefault = 1900;
+
+	private Set<String> extensionDelete;
+	private Set<String> concatWords;
+
+	@Getter
+	private String configPropertiesPath;
+
 	private ConfigServiceStatic(String pConfigName) {
 
 		if (!pConfigName.startsWith("/")) {
@@ -53,6 +62,7 @@ public class ConfigServiceStatic {
 		LOGGER.debug("Load config from : [{}]", config.getPath());
 		try {
 			File fconfig = new File(config.getPath());
+			configPropertiesPath = fconfig.getAbsolutePath();
 			execPath = FilenameUtils.getFullPathNoEndSeparator(fconfig.getAbsolutePath());
 			LOGGER.debug("execPath ######################## [{}]", execPath);
 			FileInputStream fis = new FileInputStream(fconfig);
@@ -97,18 +107,19 @@ public class ConfigServiceStatic {
 		for (int x = 10; x > 0; x--) {
 			verifyFile(BASEPATH + "." + x, out);
 		}
+		// TODO da rimuovere
+		LOGGER.info("### [{}]", out.size());
 		return out;
 	}
 
 	private void verifyFile(String path, Set<File> out) {
-		// TODO da rimuovere
-		LOGGER.info("### [{}]", path);
 		if (!properties.containsKey(path)) {
+			// TODO da rimuovere
+			LOGGER.trace("Not present [{}]", path);
 			return;
 		}
 		String pathString = properties.getProperty(path);
-		// TODO da rimuovere
-		LOGGER.info("### [{}]", pathString);
+		LOGGER.info("Path String [{}]", pathString);
 		File folder = new File(pathString);
 		if (folder.exists()) {
 			out.add(folder);
@@ -118,9 +129,6 @@ public class ConfigServiceStatic {
 	public String getExclusionPath() {
 		return ((String) properties.get(EXCLUSIONPATH)).trim();
 	}
-
-	private Set<String> extensionDelete;
-	private Set<String> concatWords;
 
 	public Set<String> getExtensionDelete() {
 		if (extensionDelete != null) {
@@ -141,12 +149,21 @@ public class ConfigServiceStatic {
 		return extensionDelete;
 	}
 
-	public String getYearLimit() {
+	public int getYearLimit() {
 		if (properties.containsKey(YEARLIMIT)) {
-			return ((String) properties.get(YEARLIMIT)).trim();
+			String year = properties.getProperty((YEARLIMIT)).trim();
+			try {
+				return Integer.parseInt(year);
+			} catch (Exception e) {
+				LOGGER.trace(
+						"Il parametro [{}] non contiene un valore valido verrà usato il default. Valore : [{}] default: [{}]",
+						YEARLIMIT, year, yearDefault);
+				return yearDefault;
+			}
+		} else {
+			return yearDefault;
 		}
 
-		return StringUtils.EMPTY;
 	}
 
 	public File getReportFile() {
@@ -205,6 +222,16 @@ public class ConfigServiceStatic {
 			return false;
 		}
 		return "true".equals(properties.getProperty(param).trim()) ? true : false;
+	}
+
+	public String logFlags() {
+		StringBuilder out = new StringBuilder();
+		out.append("RENAME : ").append(getRENAME()).append("\n").append("MOVE : ").append(getMOVE()).append("\n")
+				.append("DELETEEXT : ").append(getDELETEEXT()).append("\n").append("DELTEEMPTY : ")
+				.append(getDELTEEMPTY()).append("\n").append("FOLDERDEBUG : ").append(getFOLDERDEBUG()).append("\n")
+				.append("EXEC : ").append(getEXEC());
+
+		return out.toString();
 	}
 
 }

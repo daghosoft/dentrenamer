@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -48,19 +49,22 @@ public class Main {
 		deleteByExtension();
 
 		// Operazione di rename sulle cartelle
-		renameProces(fileService.getFolderInBasePath(), TYPE.FOLDER);
+		renameProces(fileService.getFoldersInBasePath(), TYPE.FOLDER);
 
 		// Operazione di rename sui file
 		renameProces(fileService.getFilesInBasePath(), TYPE.FILE);
 
-		moveBasePath();
+		for (File basePAth : config.getBasePath()) {
+			// TODO da rimuovere
+			LOGGER.info("### [{}]", basePAth.getAbsolutePath());
+			moveBasePath(basePAth);
+		}
 
 		deleteEmptyFolders();
 
-		printSum(start, Arrays.toString(args));
+		printSum(start);
 
-		LOGGER.info("End Dent Renamer Execution");
-		LOGGER.info("### Report Generato @ [{}]", reportService.getReport().getAbsolutePath());
+		LOGGER.info("### Report Generato @ [{}]", ReportService.getReport().getAbsolutePath());
 	}
 
 	private static void deleteByExtension() {
@@ -76,7 +80,8 @@ public class Main {
 				reportService.writeDelete(file.getAbsolutePath(), TYPE.FILE);
 				deleteByExtensionCount++;
 				if (config.getEXEC()) {
-					file.delete();
+					boolean result = file.delete();
+					LOGGER.trace("Delete [{}] result [{}]", file.getAbsolutePath(), result);
 				}
 			}
 		}
@@ -88,7 +93,7 @@ public class Main {
 			return;
 		}
 
-		Collection<File> folders = fileService.getFolderInBasePath();
+		Collection<File> folders = fileService.getFoldersInBasePath();
 		for (File folder : folders) {
 			earSubFolderRemover(folder, "@eaDir");
 			earSubFolderRemover(folder, "@earDir");
@@ -97,7 +102,8 @@ public class Main {
 				reportService.writeDelete(folder.getAbsolutePath(), TYPE.FOLDER);
 				deleteEmptyCount++;
 				if (config.getEXEC()) {
-					folder.delete();
+					boolean result = folder.delete();
+					LOGGER.trace("Delete [{}] result [{}]", folder.getAbsolutePath(), result);
 				}
 			}
 
@@ -125,27 +131,26 @@ public class Main {
 		}
 	}
 
-	private static void moveBasePath() {
+	private static void moveBasePath(File basePath) {
 		if (!config.getMOVE()) {
 			return;
 		}
 
-		File basePath = new File(config.getBasePath());
-		Collection<File> files = fileService.getFilesInBasePath();
+		Set<File> files = fileService.getFiles(basePath);
 		for (File f : files) {
 			if (f.getParent().equals(basePath.getPath())) {
 				continue;
 			}
 
-			reportService.writeMove(f.getAbsolutePath(), config.getBasePath(), TYPE.FILE);
+			reportService.writeMove(f.getAbsolutePath(), basePath.getAbsolutePath(), TYPE.FILE);
 			moveProcessCount++;
 			if (config.getEXEC()) {
-				File dest = new File(config.getBasePath() + File.separator + f.getName());
+				File dest = new File(basePath.getAbsolutePath() + File.separator + f.getName());
 				try {
 					FileUtils.moveFile(f, dest);
 				} catch (IOException e) {
 					LOGGER.error("Move file : [{}]", f.getName(), e);
-					reportService.writeMoveError(f.getAbsolutePath(), config.getBasePath(), TYPE.FILE);
+					reportService.writeMoveError(f.getAbsolutePath(), basePath.getAbsolutePath(), TYPE.FILE);
 				}
 			}
 		}
@@ -187,10 +192,11 @@ public class Main {
 		reportBuilder.append(String.format("# Rename %s : %s \n", type.toString(), renameProcesCount));
 	}
 
-	private static void printSum(Date date, String argsString) {
+	private static void printSum(Date date) {
 		reportService.writeLine("\n\n##############################\n");
 		reportService.writeLine(String.format("# @ %s \n", date.toString()));
-		reportService.writeLine(String.format("# Args : %s \n", argsString));
+		reportService.writeLine(String.format("# Properties Path Ptah : %s \n", config.getConfigPropertiesPath()));
+		reportService.writeLine(String.format("# Config : %s \n", config.logFlags()));
 		reportService.writeLine("# \n");
 		reportService.writeLine(reportBuilder.toString());
 		reportService.writeLine("# \n");
