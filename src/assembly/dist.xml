@@ -15,6 +15,7 @@
 				<include>concatWords.properties</include>
 				<include>config.properties</include>
 				<include>execScript.bat</include>
+				<include>log4j.properties</include>
 			</includes>
 		</fileSet>
 		<fileSet>
