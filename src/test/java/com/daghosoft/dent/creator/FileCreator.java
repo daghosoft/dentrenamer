@@ -19,128 +19,114 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressFBWarnings()
 public class FileCreator {
-	private static String BASEPATH = StringUtils.EMPTY;
-	private static final String WINDOWSPATH = "C://temp//zzzdentRenamer";
-	private static final String MACPATH = "//uploads//FileCreator";
+    private static final String WINDOWSPATH = "C://temp//zzzdentRenamer";
+    private static final String SECONDPATH = "C://temp//zzzdentRenamerSecond";
 
-	char separator = File.separatorChar;
+    char separator = File.separatorChar;
 
-	@Test
-	@Ignore
-	public void BasePathCreator() throws IOException {
-		Validate.notEmpty(BASEPATH);
+    @Test
+    @Ignore
+    public void generatefakeListFiles() throws IOException {
+        Validate.notEmpty(WINDOWSPATH);
 
-		File basePath = new File(BASEPATH);
-		if (basePath.exists()) {
-			return;
-		}
+        String lines[] = readFileNamePackage("/fakeFileList.txt").split("\\r?\\n");
 
-		FileUtils.forceMkdir(basePath);
+        for (int x = 0; x < lines.length; x++) {
+            if (StringUtils.isNotBlank(lines[x])) {
+                String filename = WINDOWSPATH + separator + lines[x] + ".dvx";
+                System.out.println("Generating file : " + filename);
+                FileUtils.writeStringToFile(new File(filename), UUID.randomUUID().toString(), "UTF-8");
+            }
+        }
+    }
 
-	}
+    @Test
+    @Ignore
+    public void populateFileFolder() throws IOException {
+        fillFolder(WINDOWSPATH, 10030);
+        fillFolder(SECONDPATH, 200);
+    }
 
-	@Test
-	@Ignore
-	public void generatefakeListFiles() throws IOException {
-		Validate.notEmpty(BASEPATH);
+    private void fillFolder(String pPath, int max) throws IOException {
+        String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");
+        for (int x = 0; x < lines.length && x < max; x++) {
 
-		String lines[] = readFileNamePackage("/fakeFileList.txt").split("\\r?\\n");
+            if (StringUtils.isNotBlank(lines[x])) {
+                String filename = pPath + separator + lines[x];
+                System.out.println("Generating file : " + filename);
 
-		for (int x = 0; x < lines.length; x++) {
-			if (StringUtils.isNotBlank(lines[x])) {
-				String filename = BASEPATH + separator + lines[x] + ".dvx";
-				System.out.println("Generating file : " + filename);
-				FileUtils.writeStringToFile(new File(filename), UUID.randomUUID().toString(), "UTF-8");
-			}
-		}
-	}
+                Collection<String> ext = new ArrayList<String>();
+                ext.add(".dvx");
+                ext.add(".mp4");
+                ext.add(".sub");
+                ext.add(".avi");
+                ext.add(".srt");
+                ext.add(".mkv");
+                ext.add(".txt");
+                ext.add(".idx");
+                ext.add(".rar");
+                ext.add(".jpg");
+                ext.add(".jpeg");
+                ext.add(".png");
+                ext.add(".m4v ");
 
-	@Test
-	// @Ignore
-	public void populateFileFolder() throws IOException {
+                boolean isFile = false;
+                for (String s : ext) {
+                    if (filename.toLowerCase().contains(s)) {
+                        isFile = true;
+                    }
+                }
 
-		String lines[] = readFileNamePackage("/MyMovieList.txt").split("\\r?\\n");
-		for (int x = 0; x < lines.length; x++) {
-			if (StringUtils.isNotBlank(lines[x])) {
-				String filename = BASEPATH + separator + lines[x];
-				System.out.println("Generating file : " + filename);
+                if (isFile) {
+                    FileUtils.writeStringToFile(new File(filename), UUID.randomUUID().toString(), "UTF-8");
+                } else {
+                    FileUtils.forceMkdir(new File(filename));
+                }
 
-				Collection<String> ext = new ArrayList<String>();
-				ext.add(".dvx");
-				ext.add(".mp4");
-				ext.add(".sub");
-				ext.add(".avi");
-				ext.add(".srt");
-				ext.add(".mkv");
-				ext.add(".txt");
-				ext.add(".idx");
-				ext.add(".rar");
-				ext.add(".jpg");
-				ext.add(".jpeg");
-				ext.add(".png");
-				ext.add(".m4v ");
+            }
+        }
+    }
 
-				boolean isFile = false;
-				for (String s : ext) {
-					if (filename.toLowerCase().contains(s)) {
-						isFile = true;
-					}
-				}
+    protected String readFileNamePackage(String fileName) {
+        InputStream stream = this.getClass().getResourceAsStream(fileName);
 
-				if (isFile) {
-					FileUtils.writeStringToFile(new File(filename), UUID.randomUUID().toString(), "UTF-8");
-				} else {
-					FileUtils.forceMkdir(new File(filename));
-				}
+        String out = StringUtils.EMPTY;
+        if (stream != null) {
+            try {
+                out = IOUtils.toString(stream, "UTF-8");
+            } catch (IOException e) {
+            } finally {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+        return out;
+    }
 
-			}
-		}
-	}
+    @Before
+    public void setPath() {
+        createPath(WINDOWSPATH);
+        createPath(SECONDPATH);
+    }
 
-	protected String readFileNamePackage(String fileName) {
-		InputStream stream = this.getClass().getResourceAsStream(fileName);
-
-		String out = StringUtils.EMPTY;
-		if (stream != null) {
-			try {
-				out = IOUtils.toString(stream, "UTF-8");
-			} catch (IOException e) {
-			} finally {
-				try {
-					stream.close();
-				} catch (IOException e) {
-				}
-			}
-		}
-		return out;
-	}
-
-	@Before
-	public void setPath() {
-		String os = System.getProperty("os.name").toLowerCase();
-
-		if (os.contains("windows")) {
-			BASEPATH = WINDOWSPATH;
-		} else {
-			BASEPATH = MACPATH;
-		}
-
-		Validate.notEmpty(BASEPATH, "Basepath non può essere vuoto");
-		File base = new File(BASEPATH);
-		if (!base.exists()) {
-			try {
-				FileUtils.forceMkdir(base);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		if (base.listFiles().length > 0) {
-			try {
-				FileUtils.forceDelete(base);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    private void createPath(String Path) {
+        File base = new File(Path);
+        if (!base.exists()) {
+            try {
+                FileUtils.forceMkdir(base);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (base.listFiles().length > 0) {
+            try {
+                FileUtils.forceDelete(base);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 }

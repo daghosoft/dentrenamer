@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -18,187 +19,214 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Main {
 
-	private static RenamerServiceImpl renamerService;
-	private static ConfigServiceStatic config;
+    private static RenamerServiceImpl renamerService;
+    private static ConfigServiceStatic config;
 
-	private static final char separator = File.separatorChar;
+    private static final char separator = File.separatorChar;
 
-	private static FileService fileService;
-	private static ReportService reportService;
+    private static FileService fileService;
+    private static ReportService reportService;
 
-	private static int deleteByExtensionCount = 0;
-	private static int deleteEmptyCount = 0;
-	private static int moveProcessCount = 0;
-	private static int renameProcesCount = 0;
+    private static int deleteByExtensionCount = 0;
+    private static int deleteEmptyCount = 0;
+    private static int moveProcessCount = 0;
+    private static int renameProcesCount = 0;
 
-	private static StringBuilder reportBuilder = new StringBuilder();
+    private static StringBuilder reportBuilder = new StringBuilder();
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		LOGGER.info("Start Dent Renamer Execution");
+        LOGGER.info("### Start Dent Renamer Execution");
 
-		config = ConfigServiceStatic.getConfig();
-		renamerService = new RenamerServiceImpl();
-		fileService = new FileServiceImpl();
-		reportService = ReportService.get();
+        if (args == null || args.length == 0 || StringUtils.isBlank(args[0])) {
+            config = ConfigServiceStatic.getConfig();
+        } else {
+            LOGGER.info("# Override config file with [{}]", args[0]);
+            config = ConfigServiceStatic.getConfig(args[0]);
+        }
 
-		Date start = new Date();
-		String msg = String.format("Esecuzione partita @%s \n", start);
-		reportService.writeLine(msg);
+        renamerService = new RenamerServiceImpl();
+        fileService = new FileServiceImpl();
+        reportService = ReportService.get();
 
-		deleteByExtension();
+        Date start = new Date();
+        String msg = String.format("Esecuzione partita @%s \n", start);
+        reportService.writeLine(msg);
 
-		// Operazione di rename sulle cartelle
-		renameProces(fileService.getFoldersInBasePath(), TYPE.FOLDER);
+        deleteByExtension();
 
-		// Operazione di rename sui file
-		renameProces(fileService.getFilesInBasePath(), TYPE.FILE);
+        // Operazione di rename sulle cartelle
+        renameProces(fileService.getFoldersInBasePath(), TYPE.FOLDER);
 
-		for (File basePAth : config.getBasePath()) {
-			// TODO da rimuovere
-			LOGGER.info("### [{}]", basePAth.getAbsolutePath());
-			moveBasePath(basePAth);
-		}
+        // Operazione di rename sui file
+        renameProces(fileService.getFilesInBasePath(), TYPE.FILE);
 
-		deleteEmptyFolders();
+        reportBuilder.append("# Move \n");
+        for (File basePAth : config.getAllPath()) {
+            moveBasePath(basePAth);
+        }
+        reportBuilder.append("# \n");
 
-		printSum(start);
+        deleteEmptyFolders();
 
-		LOGGER.info("### Report Generato @ [{}]", ReportService.getReport().getAbsolutePath());
-	}
+        reportNoMkv();
 
-	private static void deleteByExtension() {
-		if (!config.getDELETEEXT()) {
-			return;
-		}
+        printSum(start);
 
-		Collection<File> list = fileService.getFilesInBasePath();
+        LOGGER.info("### Report Generato @ [{}]", ReportService.getReport().getAbsolutePath());
+    }
 
-		for (File file : list) {
-			String ext = FilenameUtils.getExtension(file.getName()).toLowerCase();
-			if (config.getExtensionDelete().contains(ext)) {
-				reportService.writeDelete(file.getAbsolutePath(), TYPE.FILE);
-				deleteByExtensionCount++;
-				if (config.getEXEC()) {
-					boolean result = file.delete();
-					LOGGER.trace("Delete [{}] result [{}]", file.getAbsolutePath(), result);
-				}
-			}
-		}
-		reportBuilder.append(String.format("# Delete By Extension : %s \n", deleteByExtensionCount));
-	}
+    private static void reportNoMkv() {
+        if (!config.isReportNoMkv()) {
+            return;
+        }
+        Set<File> allFiles = fileService.getFilesInBasePath();
+        deleteByExtensionCount++;
+        Set<File> filtered = allFiles.stream()
+                .filter(file -> !"mkv".equals(FilenameUtils.getExtension(file.getName().toLowerCase())))
+                .collect(Collectors.toSet());
 
-	private static void deleteEmptyFolders() {
-		if (!config.getDELTEEMPTY()) {
-			return;
-		}
+        filtered.forEach(file -> {
+            reportService.writeLine("NO-MKV [%s] Size : [%s] \n", file.getAbsolutePath(),
+                    FileUtils.byteCountToDisplaySize(file.length()));
+        });
+        reportBuilder.append(String.format("# No Mkv : %s \n", filtered.size()));
+    }
 
-		Collection<File> folders = fileService.getFoldersInBasePath();
-		for (File folder : folders) {
-			earSubFolderRemover(folder, "@eaDir");
-			earSubFolderRemover(folder, "@earDir");
-			earSubFolderRemover(folder, "@eardir");
-			if (folder.isDirectory() && folder.listFiles().length == 0) {
-				reportService.writeDelete(folder.getAbsolutePath(), TYPE.FOLDER);
-				deleteEmptyCount++;
-				if (config.getEXEC()) {
-					boolean result = folder.delete();
-					LOGGER.trace("Delete [{}] result [{}]", folder.getAbsolutePath(), result);
-				}
-			}
+    private static void deleteByExtension() {
+        if (!config.isDeteByExtension()) {
+            return;
+        }
 
-			if (config.getFOLDERDEBUG()) {
-				String debugString = String.format("\n\n DEBUG %s ------> %s  \n\n", folder.getName(),
-						Arrays.toString(folder.listFiles()));
-				reportService.writeLine(debugString);
-			}
-		}
-		reportBuilder.append(String.format("# Delete Empty Folder : %s \n", deleteEmptyCount));
-	}
+        Collection<File> list = fileService.getFilesInBasePath();
 
-	private static void earSubFolderRemover(File folder, String subName) {
-		if (!config.getEXEC() || !folder.isDirectory()) {
-			return;
-		}
-		File sub = new File(folder.getAbsolutePath() + File.separator + subName);
-		if (sub.exists()) {
-			reportService.writeDelete(sub.getAbsolutePath(), TYPE.FOLDER);
-			try {
-				FileUtils.forceDelete(sub);
-			} catch (IOException e) {
-				LOGGER.error("Errore cancellazionde della direcory : [{}]", sub.getAbsolutePath(), e);
-			}
-		}
-	}
+        for (File file : list) {
+            String ext = FilenameUtils.getExtension(file.getName()).toLowerCase();
+            if (config.getExtensionDelete().contains(ext)) {
+                reportService.writeDelete(file.getAbsolutePath(), TYPE.FILE);
+                deleteByExtensionCount++;
+                if (config.isExecFlag()) {
+                    boolean result = file.delete();
+                    LOGGER.trace("Delete [{}] result [{}]", file.getAbsolutePath(), result);
+                }
+            }
+        }
+        reportBuilder.append(String.format("# Delete By Extension : %s \n", deleteByExtensionCount));
+    }
 
-	private static void moveBasePath(File basePath) {
-		if (!config.getMOVE()) {
-			return;
-		}
+    private static void deleteEmptyFolders() {
+        if (!config.isDeteEmptyFolder()) {
+            return;
+        }
 
-		Set<File> files = fileService.getFiles(basePath);
-		for (File f : files) {
-			if (f.getParent().equals(basePath.getPath())) {
-				continue;
-			}
+        Collection<File> folders = fileService.getFoldersInBasePath();
+        for (File folder : folders) {
+            earSubFolderRemover(folder, "@eaDir");
+            earSubFolderRemover(folder, "@earDir");
+            earSubFolderRemover(folder, "@eardir");
+            if (folder.isDirectory() && folder.listFiles().length == 0) {
+                reportService.writeDelete(folder.getAbsolutePath(), TYPE.FOLDER);
+                deleteEmptyCount++;
+                if (config.isExecFlag()) {
+                    boolean result = folder.delete();
+                    LOGGER.trace("Delete [{}] result [{}]", folder.getAbsolutePath(), result);
+                }
+            }
 
-			reportService.writeMove(f.getAbsolutePath(), basePath.getAbsolutePath(), TYPE.FILE);
-			moveProcessCount++;
-			if (config.getEXEC()) {
-				File dest = new File(basePath.getAbsolutePath() + File.separator + f.getName());
-				try {
-					FileUtils.moveFile(f, dest);
-				} catch (IOException e) {
-					LOGGER.error("Move file : [{}]", f.getName(), e);
-					reportService.writeMoveError(f.getAbsolutePath(), basePath.getAbsolutePath(), TYPE.FILE);
-				}
-			}
-		}
-		reportBuilder.append(String.format("# Move Base Path : %s \n", moveProcessCount));
+            if (config.isDebug()) {
+                String debugString = String.format("\n\n DEBUG %s ------> %s  \n\n", folder.getName(),
+                        Arrays.toString(folder.listFiles()));
+                reportService.writeLine(debugString);
+            }
+        }
+        reportBuilder.append(String.format("# Delete Empty Folder : %s \n", deleteEmptyCount));
+    }
 
-	}
+    private static void earSubFolderRemover(File folder, String subName) {
+        if (!config.isExecFlag() || !folder.isDirectory()) {
+            return;
+        }
+        File sub = new File(folder.getAbsolutePath() + File.separator + subName);
+        if (sub.exists()) {
+            reportService.writeDelete(sub.getAbsolutePath(), TYPE.FOLDER);
+            try {
+                FileUtils.forceDelete(sub);
+            } catch (IOException e) {
+                LOGGER.error("Errore cancellazionde della direcory : [{}]", sub.getAbsolutePath(), e);
+            }
+        }
+    }
 
-	private static void renameProces(Collection<File> itemList, TYPE type) {
-		if (!config.getRENAME()) {
-			return;
-		}
-		for (File f : itemList) {
-			String containingPath = FilenameUtils.getFullPath(f.getAbsolutePath());
-			String name = f.getName();
-			String targetName = renamerService.rename(name, type == TYPE.FILE);
-			if (name.equals(targetName)) {
-				continue;
-			}
-			reportService.writeRename(name, targetName, type);
-			try {
-				File targetFile = new File(containingPath + separator + targetName);
-				if (!targetFile.exists()) {
-					LOGGER.debug(" {} Original Name : [{}] Target Name : [{}]", type, name, targetName);
-					if (type == TYPE.FILE && !f.isDirectory() && config.getEXEC()) {
-						FileUtils.moveFile(f, targetFile);
-					}
-					if (type == TYPE.FOLDER && f.isDirectory() && config.getEXEC()) {
-						FileUtils.moveDirectory(f, targetFile);
-					}
-					renameProcesCount++;
-				} else {
-					reportService.writeMoveError(name, targetName, type);
-				}
-			} catch (IOException e) {
-				LOGGER.error(StringUtils.EMPTY, e);
-			}
-		}
+    private static void moveBasePath(File basePath) {
+        if (!config.isFileMoveBasepath()) {
+            return;
+        }
 
-		reportBuilder.append(String.format("# Rename %s : %s \n", type.toString(), renameProcesCount));
-	}
+        reportService.writeLine("\n####################### Move Base Path : %s \n", basePath.getAbsolutePath());
+        Set<File> files = fileService.getFiles(basePath);
+        for (File f : files) {
+            if (f.getParent().equals(basePath.getPath())) {
+                continue;
+            }
 
-	private static void printSum(Date date) {
-		reportService.writeLine("\n\n##############################\n");
-		reportService.writeLine(String.format("# @ %s \n", date.toString()));
-		reportService.writeLine(String.format("# Properties Path Ptah : %s \n", config.getConfigPropertiesPath()));
-		reportService.writeLine(String.format("# Config : %s \n", config.logFlags()));
-		reportService.writeLine("# \n");
-		reportService.writeLine(reportBuilder.toString());
-		reportService.writeLine("# \n");
-	}
+            reportService.writeMove(f.getAbsolutePath(), basePath.getAbsolutePath(), TYPE.FILE);
+            moveProcessCount++;
+            if (config.isExecFlag()) {
+                File dest = new File(basePath.getAbsolutePath() + File.separator + f.getName());
+                try {
+                    FileUtils.moveFile(f, dest);
+                } catch (IOException e) {
+                    LOGGER.error("Move file : [{}]", f.getName(), e);
+                    reportService.writeMoveError(f.getAbsolutePath(), basePath.getAbsolutePath(), TYPE.FILE);
+                }
+            }
+        }
+        reportBuilder.append(String.format("#    %s : %s \n", basePath.getPath(), moveProcessCount));
+
+    }
+
+    private static void renameProces(Collection<File> itemList, TYPE type) {
+        if (!config.isFileRename()) {
+            return;
+        }
+        for (File f : itemList) {
+            String containingPath = FilenameUtils.getFullPath(f.getAbsolutePath());
+            String name = f.getName();
+            String targetName = renamerService.rename(name, type == TYPE.FILE);
+            if (name.equals(targetName)) {
+                continue;
+            }
+            reportService.writeRename(name, targetName, type);
+            try {
+                File targetFile = new File(containingPath + separator + targetName);
+                if (!targetFile.exists()) {
+                    LOGGER.debug(" {} Original Name : [{}] Target Name : [{}]", type, name, targetName);
+                    if (type == TYPE.FILE && !f.isDirectory() && config.isExecFlag()) {
+                        FileUtils.moveFile(f, targetFile);
+                    }
+                    if (type == TYPE.FOLDER && f.isDirectory() && config.isExecFlag()) {
+                        FileUtils.moveDirectory(f, targetFile);
+                    }
+                    renameProcesCount++;
+                } else {
+                    reportService.writeMoveExist(name, targetName, type);
+                }
+            } catch (IOException e) {
+                LOGGER.error(StringUtils.EMPTY, e);
+            }
+        }
+
+        reportBuilder.append(String.format("# Rename %s : %s \n", type.toString(), renameProcesCount));
+    }
+
+    private static void printSum(Date date) {
+        reportService.writeLine("\n\n##############################\n");
+        reportService.writeLine(String.format("# @ %s \n", date.toString()));
+        reportService.writeLine(String.format("# Properties Path Ptah : %s \n", config.getConfigPropertiesPath()));
+        reportService.writeLine("# \n");
+        reportService.writeLine(String.format("# Config : %s \n", config.logFlags().replaceAll(",", "\n#")));
+        reportService.writeLine("# \n");
+        reportService.writeLine(reportBuilder.toString());
+        reportService.writeLine("# \n");
+    }
 }

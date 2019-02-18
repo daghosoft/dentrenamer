@@ -12,63 +12,72 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReportService {
 
-	public enum TYPE {
-		FILE, FOLDER
-	}
+    public enum TYPE {
+        FILE, FOLDER
+    }
 
-	@Getter
-	private static File report;
+    @Getter
+    private static File report;
 
-	private static ConfigServiceStatic config;
-	private static ReportService reportService;
+    private static ConfigServiceStatic config;
+    private static ReportService reportService;
 
-	private ReportService() {
-	}
+    private ReportService() {
+    }
 
-	public static ReportService get() {
-		if (reportService != null) {
-			return reportService;
-		}
-		reportService = new ReportService();
-		config = ConfigServiceStatic.getConfig();
-		report = config.getReportFile();
-		Validate.notNull(report, "Il File di report risulta nullo impossibile procedere");
+    public static ReportService get() {
+        if (reportService != null) {
+            return reportService;
+        }
+        reportService = new ReportService();
+        config = ConfigServiceStatic.getConfig();
+        report = config.getReportFile();
+        Validate.notNull(report, "Il File di report risulta nullo impossibile procedere");
 
-		if (report.exists()) {
-			boolean success = report.delete();
-			LOGGER.trace("DElete of {} success [{}]", report.getName(), success);
-		}
+        if (report.exists()) {
+            boolean success = report.delete();
+            LOGGER.trace("DElete of {} success [{}]", report.getName(), success);
+        }
 
-		return reportService;
-	}
+        return reportService;
+    }
 
-	public void writeLine(String val) {
-		try {
-			FileUtils.write(report, val, "UTF-8", true);
-		} catch (IOException e) {
-			LOGGER.error("Eccezione nella scrittura sul file : ", e);
-		}
-	}
+    public void writeLine(String val) {
+        try {
+            FileUtils.write(report, val, "UTF-8", true);
+        } catch (IOException e) {
+            LOGGER.error("Eccezione nella scrittura sul file : ", e);
+        }
+    }
 
-	private void writeRename(String prefix, String fileName, String targetName, TYPE type) {
-		String out = String.format("%s #%s# [%s] -------> [%s] \n", prefix, type.toString(), fileName, targetName);
-		writeLine(out);
-	}
+    public void writeLine(String string, Object... args) {
+        String out = String.format(string, args);
+        writeLine(out);
+    }
 
-	public void writeMove(String fileName, String targetName, TYPE type) {
-		writeRename("MOVE", fileName, targetName, type);
-	}
+    private void writeRename(String prefix, String fileName, String targetName, TYPE type) {
+        String out = String.format("%s #%s# [%s] -------> [%s] \n", prefix, type.toString(), fileName, targetName);
+        writeLine(out);
+    }
 
-	public void writeMoveError(String fileName, String targetName, TYPE type) {
-		writeRename("######## ERROR-MOVE", fileName, targetName, type);
-	}
+    public void writeMove(String fileName, String targetName, TYPE type) {
+        writeRename("MOVE", fileName, targetName, type);
+    }
 
-	public void writeRename(String fileName, String targetName, TYPE type) {
-		writeRename("RENAME", fileName, targetName, type);
-	}
+    public void writeMoveError(String fileName, String targetName, TYPE type) {
+        writeRename("######## ERROR-MOVE", fileName, targetName, type);
+    }
 
-	public void writeDelete(String fileName, TYPE type) {
-		String out = String.format("DELETE #%s# [%s] \n", type.toString(), fileName);
-		writeLine(out);
-	}
+    public void writeMoveExist(String fileName, String targetName, TYPE type) {
+        writeRename("######## Exist", fileName, targetName, type);
+    }
+
+    public void writeRename(String fileName, String targetName, TYPE type) {
+        writeRename("RENAME", fileName, targetName, type);
+    }
+
+    public void writeDelete(String fileName, TYPE type) {
+        String out = String.format("DELETE #%s# [%s] \n", type.toString(), fileName);
+        writeLine(out);
+    }
 }

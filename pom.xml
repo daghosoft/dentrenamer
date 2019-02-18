@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dentRenamer</groupId>
@@ -51,12 +52,15 @@
 			<artifactId>slf4j-ext</artifactId>
 			<version>${org.slf4j-version}</version>
 		</dependency>
+		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-jdk14</artifactId> 
+			<version>${org.slf4j-version}</version> </dependency> -->
+
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-jdk14</artifactId>
+			<artifactId>slf4j-log4j12</artifactId>
 			<version>${org.slf4j-version}</version>
-			<scope>runtime</scope>
 		</dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -136,9 +140,11 @@
 									<manifest>
 										<attribute name="Main-Class"
 											value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader" />
-										<attribute name="Rsrc-Main-Class" value="com.daghosoft.dent.Main" />
+										<attribute name="Rsrc-Main-Class"
+											value="com.daghosoft.dent.Main" />
 										<attribute name="Class-Path" value="." />
-										<attribute name="Rsrc-Class-Path" value="./ ${echo.file.list}" />
+										<attribute name="Rsrc-Class-Path"
+											value="./ ${echo.file.list}" />
 									</manifest>
 									<zipfileset src="./jar-in-jar-loader.zip" />
 									<fileset dir="${project.build.directory}/classes" />

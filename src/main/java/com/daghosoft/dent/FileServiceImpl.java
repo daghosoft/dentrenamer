@@ -20,63 +20,63 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FileServiceImpl implements FileService {
 
-	private Set<File> basePathSet;
-	private List<String> filter = new ArrayList<>();
+    private Set<File> basePathSet;
+    private List<String> filter = new ArrayList<>();
 
-	protected FileServiceImpl() {
-		ConfigServiceStatic config = ConfigServiceStatic.getConfig();
-		basePathSet = config.getBasePath();
-		String exclusionPath = config.getExclusionPath();
-		if (StringUtils.isNotBlank(exclusionPath)) {
-			filter = Arrays.asList(exclusionPath.split(";"));
-		}
+    protected FileServiceImpl() {
+        ConfigServiceStatic config = ConfigServiceStatic.getConfig();
+        basePathSet = config.getAllPath();
+        String exclusionPath = config.getExclusionPath();
+        if (StringUtils.isNotBlank(exclusionPath)) {
+            filter = Arrays.asList(exclusionPath.split(";"));
+        }
 
-	}
+    }
 
-	@Override
-	public Set<File> getFiles(File basePathFolder) {
-		Collection<File> list = FileUtils.listFiles(basePathFolder, TrueFileFilter.TRUE, DirectoryFileFilter.INSTANCE);
-		return list.stream().filter(f -> !f.isDirectory()).filter(f -> isValidByExclusionPath(f.getAbsolutePath()))
-				.collect(Collectors.toSet());
-	}
+    @Override
+    public Set<File> getFiles(File basePathFolder) {
+        Collection<File> list = FileUtils.listFiles(basePathFolder, TrueFileFilter.TRUE, DirectoryFileFilter.INSTANCE);
+        return list.stream().filter(f -> !f.isDirectory()).filter(f -> isValidByExclusionPath(f.getAbsolutePath()))
+                .collect(Collectors.toSet());
+    }
 
-	@Override
-	public Set<File> getFilesInBasePath() {
-		Set<File> out = new HashSet<>();
-		for (File folder : basePathSet) {
-			out.addAll(getFiles(folder));
-		}
+    @Override
+    public Set<File> getFilesInBasePath() {
+        Set<File> out = new HashSet<>();
+        for (File folder : basePathSet) {
+            out.addAll(getFiles(folder));
+        }
 
-		return out;
-	}
+        return out;
+    }
 
-	@Override
-	public Set<File> getFolders(File basePathFolder) {
-		Collection<File> list = FileUtils.listFilesAndDirs(basePathFolder, new NotFileFilter(TrueFileFilter.INSTANCE),
-				DirectoryFileFilter.DIRECTORY);
-		return list.stream().filter(f -> f.isDirectory() && f != basePathFolder)
-				.filter(f -> isValidByExclusionPath(f.getAbsolutePath())).collect(Collectors.toSet());
-	}
+    @Override
+    public Set<File> getFolders(File basePathFolder) {
+        Collection<File> list = FileUtils.listFilesAndDirs(basePathFolder, new NotFileFilter(TrueFileFilter.INSTANCE),
+                DirectoryFileFilter.DIRECTORY);
+        return list.stream().filter(f -> f.isDirectory() && f != basePathFolder)
+                .filter(f -> isValidByExclusionPath(f.getAbsolutePath())).collect(Collectors.toSet());
+    }
 
-	@Override
-	public Set<File> getFoldersInBasePath() {
-		Set<File> out = new HashSet<>();
-		for (File folder : basePathSet) {
-			out.addAll(getFolders(folder));
-		}
+    @Override
+    public Set<File> getFoldersInBasePath() {
+        Set<File> out = new HashSet<>();
+        for (File folder : basePathSet) {
+            out.addAll(getFolders(folder));
+        }
 
-		return out;
-	}
+        return out;
+    }
 
-	@Override
-	public boolean isValidByExclusionPath(String path) {
-		for (String s : filter) {
-			if (path.contains(s)) {
-				LOGGER.debug("Path excluded by rule : [{}]", path);
-				return false;
-			}
-		}
-		return true;
-	}
+    @Override
+    public boolean isValidByExclusionPath(String path) {
+        for (String s : filter) {
+            if (path.contains(s)) {
+                LOGGER.debug("Path excluded by rule : [{}]", path);
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

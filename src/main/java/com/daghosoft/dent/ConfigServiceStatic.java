@@ -21,217 +21,200 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Getter
 public class ConfigServiceStatic {
 
-	public static final String CONFIGNAME = "/config.properties";
-	private static final String WORDSEPARATOR = "word.separator";
-	private static final String YEARLIMIT = "word.year.limit";
-	private static final String BASEPATH = "file.basePath";
-	private static final String EXCLUSIONPATH = "file.exclusion.path";
-	private static final String EXTENSIONDELETE = "file.extension.delete";
+    public static final String CONFIGNAME = "/config.properties";
+    // private static final String BASEPATH = "file.basePath";
 
-	protected static final String RENAME = "file.rename";
-	protected static final String MOVE = "file.move.basepath";
-	protected static final String DELETEEXT = "file.delete.by.extension";
-	protected static final String DELTEEMPTY = "folder.delete.empty";
-	protected static final String FOLDERDEBUG = "folder.debug";
-	protected static final String EXEC = "exec";
+    // path di esecuzione sulla base del config name
+    private static String execPath;
 
-	// path di esecuzione sulla base del config name
-	private static String execPath;
+    private static Properties properties;
+    private static ConfigServiceStatic config;
 
-	private static Properties properties;
-	private static ConfigServiceStatic config;
+    private int yearDefault = 1900;
 
-	private int yearDefault = 1900;
+    private Set<String> concatWords;
 
-	private Set<String> extensionDelete;
-	private Set<String> concatWords;
+    private String configPropertiesPath;
 
-	@Getter
-	private String configPropertiesPath;
+    private String wordSeparator = StringUtils.EMPTY;
 
-	private ConfigServiceStatic(String pConfigName) {
+    private String exclusionPath = StringUtils.EMPTY;
 
-		if (!pConfigName.startsWith("/")) {
-			pConfigName = "/" + pConfigName;
-		}
-		URL config = this.getClass().getResource(pConfigName);
+    private Set<String> extensionDelete;
 
-		Validate.notNull(config, "Errore recupero file di configurazione config.properties");
-		LOGGER.debug("Load config from : [{}]", config.getPath());
-		try {
-			File fconfig = new File(config.getPath());
-			configPropertiesPath = fconfig.getAbsolutePath();
-			execPath = FilenameUtils.getFullPathNoEndSeparator(fconfig.getAbsolutePath());
-			LOGGER.debug("execPath ######################## [{}]", execPath);
-			FileInputStream fis = new FileInputStream(fconfig);
-			properties = new Properties();
-			properties.load(fis);
-			fis.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    private File reportFile;
+    private boolean fileRename;
+    private boolean fileMoveBasepath;
+    private boolean deteByExtension;
+    private boolean deteEmptyFolder;
+    private boolean debug;
+    private boolean execFlag;
+    private int yearLimit;
+    private boolean reportNoMkv;
+    private Set<File> allPath;
 
-	protected static ConfigServiceStatic getConfig(String pPath) {
-		if (config != null) {
-			return config;
-		}
+    public static ConfigServiceStatic getConfig(String pConfigName) {
+        if (config != null) {
+            return config;
+        }
 
-		config = new ConfigServiceStatic(pPath);
-		return config;
-	}
+        config = new ConfigServiceStatic(pConfigName);
+        return config;
+    }
 
-	public static ConfigServiceStatic getConfig() {
-		if (config != null) {
-			return config;
-		}
+    public static ConfigServiceStatic getConfig() {
+        return getConfig(CONFIGNAME);
+    }
 
-		config = new ConfigServiceStatic(CONFIGNAME);
-		return config;
-	}
+    private ConfigServiceStatic(String pConfigName) {
 
-	public String getWordSeparator() {
-		return ((String) properties.get(WORDSEPARATOR)).trim();
-	}
+        loadProperties(pConfigName);
 
-	public Set<File> getBasePath() {
-		Validate.isTrue(properties.containsKey(BASEPATH),
-				"Il file di configurazione deve contenre almeno un basepath : " + BASEPATH);
+        allPath = loadAllPath();
+        yearLimit = populateYearLimit();
+        wordSeparator = properties.getProperty("word.separator").trim();
+        exclusionPath = properties.getProperty("file.exclusion.path").trim();
+        extensionDelete = populateExtensionDelete();
+        reportFile = new File(execPath + File.separatorChar + "dent-renamer-report.csv");
 
-		Set<File> out = new HashSet<>();
-		verifyFile(BASEPATH, out);
-		for (int x = 10; x > 0; x--) {
-			verifyFile(BASEPATH + "." + x, out);
-		}
-		// TODO da rimuovere
-		LOGGER.info("### [{}]", out.size());
-		return out;
-	}
+        fileRename = asBoolean("file.rename");
+        fileMoveBasepath = asBoolean("file.move.basepath");
+        deteByExtension = asBoolean("file.delete.by.extension");
+        deteEmptyFolder = asBoolean("folder.delete.empty");
+        debug = asBoolean("debug");
+        execFlag = asBoolean("exec");
+        reportNoMkv = asBoolean("file.report.no.mkv");
+    }
 
-	private void verifyFile(String path, Set<File> out) {
-		if (!properties.containsKey(path)) {
-			// TODO da rimuovere
-			LOGGER.trace("Not present [{}]", path);
-			return;
-		}
-		String pathString = properties.getProperty(path);
-		LOGGER.info("Path String [{}]", pathString);
-		File folder = new File(pathString);
-		if (folder.exists()) {
-			out.add(folder);
-		}
-	}
+    private void loadProperties(String pConfigName) {
+        if (!pConfigName.startsWith("/")) {
+            pConfigName = "/" + pConfigName;
+        }
+        URL config = this.getClass().getResource(pConfigName);
 
-	public String getExclusionPath() {
-		return ((String) properties.get(EXCLUSIONPATH)).trim();
-	}
+        Validate.notNull(config, "Errore recupero file di configurazione : " + pConfigName);
+        LOGGER.debug("Load config from : [{}]", config.getPath());
+        try {
+            File fconfig = new File(config.getPath());
+            configPropertiesPath = fconfig.getAbsolutePath();
+            execPath = FilenameUtils.getFullPathNoEndSeparator(fconfig.getAbsolutePath());
 
-	public Set<String> getExtensionDelete() {
-		if (extensionDelete != null) {
-			return extensionDelete;
-		}
+            LOGGER.trace("execPath ######################## [{}]", execPath);
 
-		if (properties.get(EXTENSIONDELETE) == null) {
-			return new HashSet<String>();
-		}
-		String tmp = ((String) properties.get(EXTENSIONDELETE)).trim();
-		if (StringUtils.isBlank(tmp) || !tmp.contains(";")) {
-			return new HashSet<String>();
-		}
+            FileInputStream fis = new FileInputStream(fconfig);
+            properties = new Properties();
+            properties.load(fis);
+            fis.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		List<String> list = Arrays.asList(tmp.toLowerCase().split(";"));
-		extensionDelete = new HashSet<>();
-		extensionDelete.addAll(list);
-		return extensionDelete;
-	}
+    }
 
-	public int getYearLimit() {
-		if (properties.containsKey(YEARLIMIT)) {
-			String year = properties.getProperty((YEARLIMIT)).trim();
-			try {
-				return Integer.parseInt(year);
-			} catch (Exception e) {
-				LOGGER.trace(
-						"Il parametro [{}] non contiene un valore valido verrà usato il default. Valore : [{}] default: [{}]",
-						YEARLIMIT, year, yearDefault);
-				return yearDefault;
-			}
-		} else {
-			return yearDefault;
-		}
+    private Set<File> loadAllPath() {
+        String BASEPATHKEY = "file.basePath";
+        Validate.isTrue(properties.containsKey(BASEPATHKEY),
+                "Il file di configurazione deve contenre almeno un basepath : " + BASEPATHKEY);
 
-	}
+        Set<File> out = new HashSet<>();
+        // Recupero il basepath primario
+        verifyPathExistence(BASEPATHKEY, out);
 
-	public File getReportFile() {
-		Validate.notNull(execPath);
-		return new File(execPath + File.separatorChar + "dent-renamer-report.csv");
-	}
+        // Recupero tutti i basepath di tipo file.basePath.[1-10]
+        for (int x = 10; x > 0; x--) {
+            verifyPathExistence(BASEPATHKEY + "." + x, out);
+        }
+        return out;
+    }
 
-	public Set<String> getConcatWords() {
-		Validate.notNull(execPath);
-		if (concatWords != null) {
-			return concatWords;
-		}
+    private void verifyPathExistence(String path, Set<File> out) {
+        if (!properties.containsKey(path)) {
+            return;
+        }
+        String pathString = properties.getProperty(path);
+        LOGGER.debug("Path String [{}]", pathString);
+        File folder = new File(pathString);
+        if (folder.exists()) {
+            out.add(folder);
+        }
+    }
 
-		File words = new File(execPath + File.separatorChar + "concatWords.properties");
-		LOGGER.debug("################### search for : {} {}", words.getAbsolutePath(), words.exists());
-		if (words.exists()) {
-			try {
-				List<String> listWords = FileUtils.readLines(words, "UTF-8");
-				concatWords = listWords.stream().filter(s -> StringUtils.isNotBlank(s)).map(s -> s.toLowerCase().trim())
-						.collect(Collectors.toSet());
-			} catch (Exception e) {
-				LOGGER.error("Impossibile leggere il file : [{}]", words.getAbsolutePath(), e);
-				concatWords = new HashSet<>();
-			}
-		}
+    private Set<String> populateExtensionDelete() {
+        if (extensionDelete != null) {
+            return extensionDelete;
+        }
 
-		return concatWords;
-	}
+        String EXTENSIONDELETE = "file.extension.delete";
+        if (properties.get(EXTENSIONDELETE) == null) {
+            return new HashSet<String>();
+        }
+        String tmp = properties.getProperty(EXTENSIONDELETE).trim();
+        if (StringUtils.isBlank(tmp) || !tmp.contains(";")) {
+            return new HashSet<String>();
+        }
 
-	public boolean getRENAME() {
-		return asBoolean(RENAME);
-	};
+        List<String> list = Arrays.asList(tmp.toLowerCase().split(";"));
+        extensionDelete = new HashSet<>();
+        extensionDelete.addAll(list);
+        return extensionDelete;
+    }
 
-	public boolean getMOVE() {
-		return asBoolean(MOVE);
-	};
+    private int populateYearLimit() {
+        String YEARLIMIT = "word.year.limit";
+        if (properties.containsKey(YEARLIMIT)) {
+            String year = properties.getProperty((YEARLIMIT)).trim();
+            try {
+                return Integer.parseInt(year);
+            } catch (Exception e) {
+                LOGGER.trace(
+                        "Il parametro [{}] non contiene un valore valido verrà usato il default. Valore : [{}] default: [{}]",
+                        YEARLIMIT, year, yearDefault);
+                return yearDefault;
+            }
+        } else {
+            return yearDefault;
+        }
 
-	public boolean getDELETEEXT() {
-		return asBoolean(DELETEEXT);
-	};
+    }
 
-	public boolean getDELTEEMPTY() {
-		return asBoolean(DELTEEMPTY);
-	};
+    public Set<String> getConcatWords() {
+        Validate.notNull(execPath);
+        if (concatWords != null) {
+            return concatWords;
+        }
 
-	public boolean getFOLDERDEBUG() {
-		return asBoolean(FOLDERDEBUG);
-	};
+        File words = new File(execPath + File.separatorChar + "concatWords.properties");
+        LOGGER.debug("################### search for : {} {}", words.getAbsolutePath(), words.exists());
+        if (words.exists()) {
+            try {
+                List<String> listWords = FileUtils.readLines(words, "UTF-8");
+                concatWords = listWords.stream().filter(s -> StringUtils.isNotBlank(s)).map(s -> s.toLowerCase().trim())
+                        .collect(Collectors.toSet());
+            } catch (Exception e) {
+                LOGGER.error("Impossibile leggere il file : [{}]", words.getAbsolutePath(), e);
+                concatWords = new HashSet<>();
+            }
+        }
 
-	public boolean getEXEC() {
-		return asBoolean(EXEC);
-	};
+        return concatWords;
+    }
 
-	private boolean asBoolean(String param) {
-		if (properties.getProperty(param) == null) {
-			return false;
-		}
-		return "true".equals(properties.getProperty(param).trim()) ? true : false;
-	}
+    private boolean asBoolean(String param) {
+        if (properties.getProperty(param) == null) {
+            return false;
+        }
+        return "true".equals(properties.getProperty(param).trim()) ? true : false;
+    }
 
-	public String logFlags() {
-		StringBuilder out = new StringBuilder();
-		out.append("RENAME : ").append(getRENAME()).append("\n").append("MOVE : ").append(getMOVE()).append("\n")
-				.append("DELETEEXT : ").append(getDELETEEXT()).append("\n").append("DELTEEMPTY : ")
-				.append(getDELTEEMPTY()).append("\n").append("FOLDERDEBUG : ").append(getFOLDERDEBUG()).append("\n")
-				.append("EXEC : ").append(getEXEC());
-
-		return out.toString();
-	}
+    public String logFlags() {
+        return "Flags=" + fileRename + ", moveExec=" + fileMoveBasepath + ", deteByExtension="
+                + deteByExtension + ", deteEmptyFolder=" + deteEmptyFolder + ", folderDebug=" + debug + ", execFlag="
+                + execFlag + ", yearLimit=" + yearLimit;
+    }
 
 }
