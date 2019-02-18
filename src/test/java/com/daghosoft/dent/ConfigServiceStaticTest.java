@@ -40,10 +40,9 @@ public class ConfigServiceStaticTest {
     }
 
     @Test
-    public void getReportFileTest() {
-        File f = sut.getReportFile();
-        assertThat(f).isNotNull();
-        assertThat(f.getName()).isEqualTo("dent-renamer-report.csv");
+    public void reportFileTest() {
+        File out = sut.getReportFile();
+        assertThat(out.getName()).contains("report.csv");
     }
 
     @Test

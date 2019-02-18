@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 public class ConfigServiceStatic {
 
     public static final String CONFIGNAME = "/config.properties";
-    // private static final String BASEPATH = "file.basePath";
 
     // path di esecuzione sulla base del config name
     private static String execPath;
@@ -78,7 +77,9 @@ public class ConfigServiceStatic {
         wordSeparator = properties.getProperty("word.separator").trim();
         exclusionPath = properties.getProperty("file.exclusion.path").trim();
         extensionDelete = populateExtensionDelete();
-        reportFile = new File(execPath + File.separatorChar + "dent-renamer-report.csv");
+
+        String filename = properties.getProperty("report.file.name", "dent-renamer-report.csv");
+        reportFile = new File(execPath + File.separatorChar + filename);
 
         fileRename = asBoolean("file.rename");
         fileMoveBasepath = asBoolean("file.move.basepath");
