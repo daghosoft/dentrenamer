@@ -71,6 +71,7 @@ public class ConfigServiceStatic {
 	private ConfigServiceStatic(String pConfigName) {
 
 		loadProperties(pConfigName);
+		debug = asBoolean("debug");
 
 		allPath = loadAllPath();
 		yearLimit = populateYearLimit();
@@ -85,7 +86,7 @@ public class ConfigServiceStatic {
 		fileMoveBasepath = asBoolean("file.move.basepath");
 		deteByExtension = asBoolean("file.delete.by.extension");
 		deteEmptyFolder = asBoolean("folder.delete.empty");
-		debug = asBoolean("debug");
+
 		execFlag = asBoolean("exec");
 		reportNoMkv = asBoolean("file.report.no.mkv");
 	}
@@ -138,8 +139,11 @@ public class ConfigServiceStatic {
 			return;
 		}
 		String pathString = properties.getProperty(path);
-		LOGGER.debug("Path String [{}]", pathString);
 		File folder = new File(pathString);
+		if (debug) {
+			LOGGER.info("Base Path [{}] exist [{}]", pathString, folder.exists());
+		}
+
 		if (folder.exists()) {
 			out.add(folder);
 		}
@@ -214,7 +218,7 @@ public class ConfigServiceStatic {
 
 	public String logFlags() {
 		return "Flags=" + fileRename + ", moveExec=" + fileMoveBasepath + ", deteByExtension=" + deteByExtension
-				+ ", deteEmptyFolder=" + deteEmptyFolder + ", Debug=" + debug + ", execFlag=" + execFlag
+				+ ", deteEmptyFolder=" + deteEmptyFolder + ", debug=" + debug + ", execFlag=" + execFlag
 				+ ", yearLimit=" + yearLimit;
 	}
 
