@@ -25,7 +25,7 @@ public class RenamerServiceImplTest {
 	@Test
 	public void renameEmpty() {
 		String out = sut.rename("sub.avi ", true);
-		assertThat(out).isEqualTo("Storia Di Un Italiano Il Gatto Con Gli Stivali (2011) - (2011).avi");
+		assertThat(out).isEqualTo("sub.avi");
 	}
 
 	// ------------------------------- removeWordSeparator
