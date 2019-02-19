@@ -190,6 +190,7 @@ public class Main {
 			return;
 		}
 		for (File f : itemList) {
+			LOGGER.debug("{} #Evaluate # [{}]", type, f.getAbsolutePath());
 			String containingPath = FilenameUtils.getFullPath(f.getAbsolutePath());
 			String name = f.getName();
 			String targetName = renamerService.rename(name, type == TYPE.FILE);

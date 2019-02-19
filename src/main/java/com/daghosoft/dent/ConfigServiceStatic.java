@@ -141,7 +141,7 @@ public class ConfigServiceStatic {
 		String pathString = properties.getProperty(path);
 		File folder = new File(pathString);
 		if (debug) {
-			LOGGER.info("Base Path [{}] exist [{}]", pathString, folder.exists());
+			LOGGER.info("#Debug is True#: Base Path [{}] exist [{}]", pathString, folder.exists());
 		}
 
 		if (folder.exists()) {
