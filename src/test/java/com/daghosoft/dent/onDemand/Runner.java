@@ -1,9 +1,11 @@
-package com.daghosoft.dent;
+package com.daghosoft.dent.onDemand;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class MainTest {
+import com.daghosoft.dent.Main;
+
+public class Runner {
 
 	@Test
 	@Ignore
